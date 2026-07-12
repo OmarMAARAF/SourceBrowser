@@ -4,6 +4,9 @@
 
 Source browser website generator that powers https://referencesource.microsoft.com, http://sourceroslyn.io, https://source.dot.net, and others.
 
+> [!WARNING]
+> **This project is soft-archived.** Unfortunately at this point I'm unlikely to take even the basic PRs. I've given this project everything I could give over 13 years and I'm afraid I have nothing else left.
+
 Create and host your own static HTML website to browse your C#/VB/MSBuild/TypeScript source code. **Note** that it does require an ASP.NET Core website for hosting (symbol index is kept server-side), so [without ASP.NET Core the search function doesn't work](https://github.com/KirillOsenkov/SourceBrowser/wiki/Architecture#server-side).
 
 Of course Source Browser allows you to browse its own source code:
@@ -62,6 +65,6 @@ The generator is not incremental. You have to generate into an empty folder from
 
 ## Project status and contributions
 
-This is a reference implementation that showcases the concepts and Roslyn usage. It comes with no guarantees, use at your own risk. We will consider accepting high-quality pull requests that add non-trivial value, however we have no plans to do significant work on the application in its current form. Any significant rearchitecture, adding large features, big refactorings won't be accepted because of resource constraints. Feel free to use it to generate websites for your own code, integrate in your CI servers etc. Feel free to do whatever you want in your own forks. Bug reports are gratefully accepted.
+This is a reference implementation that showcases the concepts and Roslyn usage. It comes with no guarantees, use at your own risk. We have no further plans to do any work in this repo. Any significant rearchitecture, adding large features, big refactorings won't be accepted because of resource constraints. Feel free to use it to generate websites for your own code, integrate in your CI servers etc. Feel free to do whatever you want in your own forks. Bug reports are still accepted with no guarantees or expectations.
 
-For any questions, feel free to reach out to [@KirillOsenkov](https://twitter.com/KirillOsenkov) on Twitter. Thanks to [@v2_matveev](https://twitter.com/v2_matveev) for contributing TypeScript support! Thanks to numerous other contributors for various fixes and contributions!
+For any questions, feel free to reach out to [kirillosenkov.com on BlueSky](https://bsky.app/profile/kirillosenkov.com). Thanks to numerous contributors for various fixes and contributions!
