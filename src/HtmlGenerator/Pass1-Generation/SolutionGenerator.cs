@@ -26,6 +26,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
         public IEnumerable<string> PluginBlacklist { get; private set; }
         private readonly HashSet<string> typeScriptFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        private readonly object _typeScriptFilesLock = new object();
         public MEF.PluginAggregator PluginAggregator;
 
         /// <summary>
@@ -327,7 +328,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
         public static string CurrentAssemblyName = null;
 
         /// <returns>true if only part of the solution was processed and the method needs to be called again, false if all done</returns>
-        public async Task<bool> GenerateAsync(CancellationToken cancellationToken, HashSet<string> processedAssemblyList = null, Folder<ProjectSkeleton> solutionExplorerRoot = null)
+        public async Task<bool> GenerateAsync(CancellationToken cancellationToken, HashSet<string> processedAssemblyList = null, Folder<ProjectSkeleton> solutionExplorerRoot = null, SemaphoreSlim solutionExplorerSemaphore = null)
         {
             if (solution == null)
             {
@@ -342,38 +343,67 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 Log.Exception("Solution " + this.ProjectFilePath + " has 0 projects - this is suspicious");
             }
 
-            var projectsToProcess = allProjects
-                .Where(p => processedAssemblyList == null || processedAssemblyList.Add(p.AssemblyName))
-                .Where(p => !ExcludeTests || !IsTestProject(p))
-                .ToArray();
-            var currentBatch = projectsToProcess
-                .ToArray();
-            foreach (var project in currentBatch)
+            Project[] projectsToProcess;
+            if (processedAssemblyList == null)
             {
+                projectsToProcess = allProjects
+                    .Where(p => !ExcludeTests || !IsTestProject(p))
+                    .ToArray();
+            }
+            else
+            {
+                var filtered = new List<Project>();
+                foreach (var p in allProjects)
+                {
+                    bool added;
+                    lock (processedAssemblyList) { added = processedAssemblyList.Add(p.AssemblyName); }
+                    if (added && (!ExcludeTests || !IsTestProject(p)))
+                    {
+                        filtered.Add(p);
+                    }
+                }
+                projectsToProcess = filtered.ToArray();
+            }
+            var currentBatch = projectsToProcess;
+            object fileAppendLock = (object)processedAssemblyList ?? new object();
+            var sem = new SemaphoreSlim(Environment.ProcessorCount);
+            var projectTasks = currentBatch.Select(async project =>
+            {
+                await sem.WaitAsync(cancellationToken);
                 try
                 {
-                    CurrentAssemblyName = project.AssemblyName;
-
                     var generator = new ProjectGenerator(this, project);
                     await generator.GenerateAsync();
-
-                    File.AppendAllText(Paths.ProcessedAssemblies, project.AssemblyName + Environment.NewLine, Encoding.UTF8);
+                    lock (fileAppendLock)
+                    {
+                        File.AppendAllText(Paths.ProcessedAssemblies, project.AssemblyName + Environment.NewLine, Encoding.UTF8);
+                    }
                 }
                 finally
                 {
-                    CurrentAssemblyName = null;
-                    GC.Collect();
-                    GC.WaitForPendingFinalizers();
-                    GC.Collect();
+                    sem.Release();
                 }
-            }
+            }).ToArray();
+            await Task.WhenAll(projectTasks);
 
             new TypeScriptSupport().Generate(typeScriptFiles, SolutionDestinationFolder);
 
-            await AddProjectsToSolutionExplorerAsync(
-                solutionExplorerRoot,
-                currentBatch,
-                cancellationToken);
+            if (solutionExplorerSemaphore != null)
+            {
+                await solutionExplorerSemaphore.WaitAsync(cancellationToken);
+                try
+                {
+                    await AddProjectsToSolutionExplorerAsync(solutionExplorerRoot, currentBatch, cancellationToken);
+                }
+                finally
+                {
+                    solutionExplorerSemaphore.Release();
+                }
+            }
+            else
+            {
+                await AddProjectsToSolutionExplorerAsync(solutionExplorerRoot, currentBatch, cancellationToken);
+            }
 
             return currentBatch.Length < projectsToProcess.Length;
         }
@@ -575,7 +605,10 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
         public void AddTypeScriptFile(string filePath)
         {
-            this.typeScriptFiles.Add(filePath);
+            lock (_typeScriptFilesLock)
+            {
+                this.typeScriptFiles.Add(filePath);
+            }
         }
 
         public void Dispose()

@@ -23,6 +23,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             HashSet<string> processedAssemblyList = null,
             HashSet<string> assemblyNames = null,
             Folder<ProjectSkeleton> solutionExplorerRoot = null,
+            SemaphoreSlim solutionExplorerSemaphore = null,
             bool includeSourceGeneratedDocuments = true)
         {
             try
@@ -45,7 +46,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                         includeSourceGeneratedDocuments);
                     solutionGenerator.ServerPathMappings = serverPathMappings;
                     solutionGenerator.GlobalAssemblyList = assemblyNames;
-                    await solutionGenerator.GenerateAsync(cancellationToken, processedAssemblyList, solutionExplorerRoot);
+                    await solutionGenerator.GenerateAsync(cancellationToken, processedAssemblyList, solutionExplorerRoot, solutionExplorerSemaphore);
                 }
                 else
                 {

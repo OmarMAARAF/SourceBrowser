@@ -170,17 +170,29 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                         path.EndsWith(".buildlog", StringComparison.OrdinalIgnoreCase))
                     {
                         var invocations = BinLogCompilerInvocationsReader.ExtractInvocations(path);
-                        foreach (var invocation in invocations)
+                        var solutionExplorerSemaphore = new SemaphoreSlim(1, 1);
+                        var invocationSemaphore = new SemaphoreSlim(Environment.ProcessorCount);
+                        var invocationTasks = invocations.Select(async invocation =>
                         {
-                            await GenerateFromBuildLog.GenerateInvocationAsync(
-                                invocation,
-                                cancellationToken,
-                                serverPathMappings,
-                                processedAssemblyList,
-                                assemblyNames,
-                                solutionFolder,
-                                includeSourceGeneratedDocuments: includeSourceGeneratedDocuments);
-                        }
+                            await invocationSemaphore.WaitAsync(cancellationToken);
+                            try
+                            {
+                                await GenerateFromBuildLog.GenerateInvocationAsync(
+                                    invocation,
+                                    cancellationToken,
+                                    serverPathMappings,
+                                    processedAssemblyList,
+                                    assemblyNames,
+                                    solutionFolder,
+                                    solutionExplorerSemaphore,
+                                    includeSourceGeneratedDocuments: includeSourceGeneratedDocuments);
+                            }
+                            finally
+                            {
+                                invocationSemaphore.Release();
+                            }
+                        }).ToArray();
+                        await Task.WhenAll(invocationTasks);
                         
                         continue;
                     }
@@ -200,10 +212,6 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                         await solutionGenerator.GenerateAsync(cancellationToken, processedAssemblyList, solutionFolder);
                     }
                 }
-
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-                GC.Collect();
             }
         }
 
