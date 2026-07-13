@@ -23,7 +23,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             bool loadPlugins,
             bool excludeTests,
             string rootPath,
-            bool includeSourceGeneratedDocuments)
+            bool includeSourceGeneratedDocuments,
+            string binlogRebasePath = null)
         {
             SolutionDestinationFolder = solutionDestinationFolder;
             Projects = projects;
@@ -40,6 +41,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             ExcludeTests = excludeTests;
             RootPath = rootPath;
             IncludeSourceGeneratedDocuments = includeSourceGeneratedDocuments;
+            BinlogRebasePath = binlogRebasePath;
         }
 
         public string SolutionDestinationFolder { get; }
@@ -57,6 +59,11 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
         public bool LoadPlugins { get; }
         public bool ExcludeTests { get; }
         public string RootPath { get; }
+        /// <summary>
+        /// Local root of the repository used when the .binlog was produced on a different machine.
+        /// e.g. /rebase:D:\work\infra  or  /rebase:.  (uses current directory)
+        /// </summary>
+        public string BinlogRebasePath { get; }
 
         public static CommandLineOptions Parse(params string[] args)
         {
@@ -75,6 +82,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             var excludeTests = false;
             var includeSourceGeneratedDocuments = true;
             var rootPath = (string)null;
+            var binlogRebasePath = (string)null;
 
             foreach (var arg in args)
             {
@@ -231,6 +239,12 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     continue;
                 }
 
+                if (arg.StartsWith("/rebase:", StringComparison.Ordinal))
+                {
+                    binlogRebasePath = Path.GetFullPath(arg.Substring("/rebase:".Length).StripQuotes());
+                    continue;
+                }
+
                 try
                 {
                     AddProject(projects, arg);
@@ -269,7 +283,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 loadPlugins,
                 excludeTests,
                 rootPath,
-                includeSourceGeneratedDocuments);
+                includeSourceGeneratedDocuments,
+                binlogRebasePath);
         }
 
         private static void AddProject(List<string> projects, string path)
