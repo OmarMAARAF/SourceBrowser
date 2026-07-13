@@ -2,6 +2,54 @@
 
 [![NuGet package](https://img.shields.io/nuget/v/SourceBrowser.svg)](https://nuget.org/packages/SourceBrowser)
 
+---
+
+## Fork improvements (`perf/parallel-indexing` branch)
+
+This fork adds two sets of improvements on top of the upstream codebase.
+
+### 1. Parallel indexing — significantly faster on large projects
+
+The original generator processed every project and every `.binlog` compiler invocation **sequentially**. On a large solution this is the main cause of long (1–2 h) indexing times.
+
+Changes made:
+
+| What | Before | After |
+|---|---|---|
+| GC between projects | `GC.Collect()` forced after every project / solution | Removed — let the runtime decide |
+| Projects inside a solution | Sequential `foreach` | `Task.WhenAll` + `SemaphoreSlim(ProcessorCount)` |
+| Compiler invocations in a `.binlog` | Sequential `foreach` | `Task.WhenAll` + `SemaphoreSlim(ProcessorCount)` |
+
+Thread-safety additions required by the parallel loops:
+- `processedAssemblyList` (`HashSet`) mutations locked via `lock(processedAssemblyList)`
+- `File.AppendAllText` on the checkpoint file serialised through a shared lock
+- `Folder<T>` (solution explorer tree) mutations serialised through `SemaphoreSlim(1,1)` so `await` works correctly inside the guard
+- `SolutionGenerator.typeScriptFiles` (`HashSet`) locked via a dedicated `_typeScriptFilesLock`
+
+### 2. `/rebase` — cross-agent `.binlog` indexing
+
+When your **build** runs on agent A and **SourceBrowser** runs on agent B, every path embedded in the `.binlog` points to agent A's filesystem. SourceBrowser then tries (and fails) to open those paths locally, logging thousands of `Document doesn't exist on disk` errors.
+
+**New argument:** `/rebase:<local-repo-root>`
+
+```
+HtmlGenerator.exe Compile.binlog /out:... /rebase:D:\work\infra
+```
+
+Or using a relative path (`.` = current working directory):
+
+```
+HtmlGenerator.exe Compile.binlog /out:... /rebase:.
+```
+
+**How it works:**
+1. Takes the last path segment of the value you pass (e.g. `infra`) as the repository folder name.
+2. Scans the recorded `ProjectFilePath` / `OutputAssemblyPath` in the binlog to find the old machine prefix up to that folder (case-insensitive), e.g. `D:\TeamCity\SRVCLDGUSD201-2\work\infra`.
+3. Rewrites `ProjectFilePath`, `OutputAssemblyPath`, and `CommandLineArguments` (which embeds source file paths) in every invocation before indexing begins.
+4. The rewrite compiles a single `Regex` for the whole run and applies it in parallel across all invocations, so there is no measurable overhead even for very large binlogs.
+
+---
+
 Source browser website generator that powers https://referencesource.microsoft.com, http://sourceroslyn.io, https://source.dot.net, and others.
 
 > [!WARNING]

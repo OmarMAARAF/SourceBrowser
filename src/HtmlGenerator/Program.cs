@@ -118,36 +118,45 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             IEnumerable<GenerateFromBuildLog.CompilerInvocation> invocations,
             string newLocalRoot)
         {
+            var list = invocations.ToArray(); // materialise once so we can scan then transform
             var repoName = Path.GetFileName(newLocalRoot.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+
+            // First pass: find the old root from recorded paths (stops at first match).
             string oldRoot = null;
-
-            var result = new List<GenerateFromBuildLog.CompilerInvocation>();
-            foreach (var inv in invocations)
+            foreach (var inv in list)
             {
-                if (oldRoot == null)
-                {
-                    oldRoot = FindRepoRoot(inv.ProjectFilePath, repoName)
-                           ?? FindRepoRoot(inv.OutputAssemblyPath, repoName);
-                }
-
-                if (oldRoot == null || string.Equals(oldRoot, newLocalRoot, StringComparison.OrdinalIgnoreCase))
-                {
-                    result.Add(inv);
-                    continue;
-                }
-
-                result.Add(new GenerateFromBuildLog.CompilerInvocation
-                {
-                    ProjectFilePath = RebasePath(inv.ProjectFilePath, oldRoot, newLocalRoot),
-                    OutputAssemblyPath = RebasePath(inv.OutputAssemblyPath, oldRoot, newLocalRoot),
-                    CommandLineArguments = RebaseString(inv.CommandLineArguments, oldRoot, newLocalRoot),
-                    SolutionRoot = inv.SolutionRoot,
-                    TypeScriptFiles = inv.TypeScriptFiles,
-                    Language = inv.Language,
-                });
+                oldRoot = FindRepoRoot(inv.ProjectFilePath, repoName)
+                       ?? FindRepoRoot(inv.OutputAssemblyPath, repoName);
+                if (oldRoot != null) { break; }
             }
 
-            return result.ToArray();
+            // Nothing to rebase (paths already match, or oldRoot not found).
+            if (oldRoot == null || string.Equals(oldRoot, newLocalRoot, StringComparison.OrdinalIgnoreCase))
+            {
+                return list;
+            }
+
+            // Pre-compile the regex and replacement string once for all invocations.
+            var oldRootRegex = new Regex(Regex.Escape(oldRoot), RegexOptions.IgnoreCase | RegexOptions.Compiled);
+            var escapedNewRoot = newLocalRoot.Replace("$", "$$"); // '$' is special in Regex replacements
+
+            // Second pass: rewrite paths in parallel across all invocations.
+            var result = new GenerateFromBuildLog.CompilerInvocation[list.Length];
+            Parallel.For(0, list.Length, i =>
+            {
+                var inv = list[i];
+                result[i] = new GenerateFromBuildLog.CompilerInvocation
+                {
+                    ProjectFilePath    = RebasePath(inv.ProjectFilePath, oldRoot, newLocalRoot),
+                    OutputAssemblyPath = RebasePath(inv.OutputAssemblyPath, oldRoot, newLocalRoot),
+                    CommandLineArguments = oldRootRegex.Replace(inv.CommandLineArguments ?? string.Empty, escapedNewRoot),
+                    SolutionRoot       = inv.SolutionRoot,
+                    TypeScriptFiles    = inv.TypeScriptFiles,
+                    Language           = inv.Language,
+                };
+            });
+
+            return result;
         }
 
         // Walk path segments looking for a folder matching repoName (case-insensitive).
@@ -175,15 +184,6 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 return newRoot + path.Substring(oldRoot.Length);
             }
             return path;
-        }
-
-        // Case-insensitive string replace for the raw command-line text.
-        // Uses Regex because string.Replace(string,string,StringComparison) is .NET Core only.
-        private static string RebaseString(string text, string oldRoot, string newRoot)
-        {
-            if (string.IsNullOrEmpty(text)) { return text; }
-            // Escape '$' in replacement to avoid Regex treating it as a back-reference.
-            return Regex.Replace(text, Regex.Escape(oldRoot), newRoot.Replace("$", "$$"), RegexOptions.IgnoreCase);
         }
 
         private static readonly Folder<ProjectSkeleton> mergedSolutionExplorerRoot = new Folder<ProjectSkeleton>();
