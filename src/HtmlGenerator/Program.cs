@@ -81,7 +81,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     };
 
                     await IndexSolutionsAsync(options.Projects, options.Properties, federation, options.ServerPathMappings, options.PluginBlacklist, cts.Token, options.DoNotIncludeReferencedProjects, options.RootPath,
-                        options.IncludeSourceGeneratedDocuments);
+                        options.IncludeSourceGeneratedDocuments, options.BinlogRebasePath);
                 }
                 FinalizeProjects(options.EmitAssemblyList, federation);
                 WebsiteFinalizer.Finalize(websiteDestination, options.EmitAssemblyList, federation);
@@ -104,9 +104,86 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 + "[/offlinefederation:server=assemblyListFile] "
                 + "[/assemblylist]"
                 + "[/excludetests]" 
-                + "[/excludeSourceGeneratedDocuments]" +
-                "" +
-                "Plugins are now off by default.");
+                + "[/excludeSourceGeneratedDocuments]"
+                + "[/rebase:<localreporoot>] "
+                + "Plugins are now off by default.");
+        }
+
+        /// <summary>
+        /// Rewrites paths in compiler invocations extracted from a .binlog that was produced on
+        /// a different machine/agent.  Finds the old machine prefix by locating the repository
+        /// folder name inside recorded paths and replaces it with <paramref name="newLocalRoot"/>.
+        /// </summary>
+        private static GenerateFromBuildLog.CompilerInvocation[] RebaseInvocations(
+            IEnumerable<GenerateFromBuildLog.CompilerInvocation> invocations,
+            string newLocalRoot)
+        {
+            var repoName = Path.GetFileName(newLocalRoot.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+            string oldRoot = null;
+
+            var result = new List<GenerateFromBuildLog.CompilerInvocation>();
+            foreach (var inv in invocations)
+            {
+                if (oldRoot == null)
+                {
+                    oldRoot = FindRepoRoot(inv.ProjectFilePath, repoName)
+                           ?? FindRepoRoot(inv.OutputAssemblyPath, repoName);
+                }
+
+                if (oldRoot == null || string.Equals(oldRoot, newLocalRoot, StringComparison.OrdinalIgnoreCase))
+                {
+                    result.Add(inv);
+                    continue;
+                }
+
+                result.Add(new GenerateFromBuildLog.CompilerInvocation
+                {
+                    ProjectFilePath = RebasePath(inv.ProjectFilePath, oldRoot, newLocalRoot),
+                    OutputAssemblyPath = RebasePath(inv.OutputAssemblyPath, oldRoot, newLocalRoot),
+                    CommandLineArguments = RebaseString(inv.CommandLineArguments, oldRoot, newLocalRoot),
+                    SolutionRoot = inv.SolutionRoot,
+                    TypeScriptFiles = inv.TypeScriptFiles,
+                    Language = inv.Language,
+                });
+            }
+
+            return result.ToArray();
+        }
+
+        // Walk path segments looking for a folder matching repoName (case-insensitive).
+        // Returns everything up to and including that folder, e.g. "D:\work\Infra".
+        private static string FindRepoRoot(string path, string repoName)
+        {
+            if (string.IsNullOrEmpty(path)) { return null; }
+            var normalised = path.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+            var parts = normalised.Split(Path.DirectorySeparatorChar);
+            for (int i = 0; i < parts.Length; i++)
+            {
+                if (string.Equals(parts[i], repoName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return string.Join(Path.DirectorySeparatorChar.ToString(), parts, 0, i + 1);
+                }
+            }
+            return null;
+        }
+
+        private static string RebasePath(string path, string oldRoot, string newRoot)
+        {
+            if (string.IsNullOrEmpty(path)) { return path; }
+            if (path.StartsWith(oldRoot, StringComparison.OrdinalIgnoreCase))
+            {
+                return newRoot + path.Substring(oldRoot.Length);
+            }
+            return path;
+        }
+
+        // Case-insensitive string replace for the raw command-line text.
+        // Uses Regex because string.Replace(string,string,StringComparison) is .NET Core only.
+        private static string RebaseString(string text, string oldRoot, string newRoot)
+        {
+            if (string.IsNullOrEmpty(text)) { return text; }
+            // Escape '$' in replacement to avoid Regex treating it as a back-reference.
+            return Regex.Replace(text, Regex.Escape(oldRoot), newRoot.Replace("$", "$$"), RegexOptions.IgnoreCase);
         }
 
         private static readonly Folder<ProjectSkeleton> mergedSolutionExplorerRoot = new Folder<ProjectSkeleton>();
@@ -132,7 +209,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             CancellationToken cancellationToken,
             bool doNotIncludeReferencedProjects = false,
             string rootPath = null,
-            bool includeSourceGeneratedDocuments = true)
+            bool includeSourceGeneratedDocuments = true,
+            string binlogRebasePath = null)
         {
             var assemblyNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
@@ -169,7 +247,11 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     if (path.EndsWith(".binlog", StringComparison.OrdinalIgnoreCase) ||
                         path.EndsWith(".buildlog", StringComparison.OrdinalIgnoreCase))
                     {
-                        var invocations = BinLogCompilerInvocationsReader.ExtractInvocations(path);
+                        var invocations = BinLogCompilerInvocationsReader.ExtractInvocations(path).ToArray();
+                        if (binlogRebasePath != null)
+                        {
+                            invocations = RebaseInvocations(invocations, binlogRebasePath);
+                        }
                         foreach (var invocation in invocations)
                         {
                             await GenerateFromBuildLog.GenerateInvocationAsync(
