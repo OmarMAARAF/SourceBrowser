@@ -111,26 +111,25 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
         /// <summary>
         /// Rewrites paths in compiler invocations extracted from a .binlog that was produced on
-        /// a different machine/agent.  Finds the old machine prefix by locating the repository
-        /// folder name inside recorded paths and replaces it with <paramref name="newLocalRoot"/>.
+        /// a different machine/agent. Detects the old root automatically by finding the longest
+        /// common path prefix shared by all recorded paths in the binlog, then replaces it with
+        /// <paramref name="newLocalRoot"/>. Works even when the repo folder names differ between agents.
         /// </summary>
         private static GenerateFromBuildLog.CompilerInvocation[] RebaseInvocations(
             IEnumerable<GenerateFromBuildLog.CompilerInvocation> invocations,
             string newLocalRoot)
         {
-            var list = invocations.ToArray(); // materialise once so we can scan then transform
-            var repoName = Path.GetFileName(newLocalRoot.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+            var list = invocations.ToArray();
 
-            // First pass: find the old root from recorded paths (stops at first match).
-            string oldRoot = null;
-            foreach (var inv in list)
-            {
-                oldRoot = FindRepoRoot(inv.ProjectFilePath, repoName)
-                       ?? FindRepoRoot(inv.OutputAssemblyPath, repoName);
-                if (oldRoot != null) { break; }
-            }
+            // Collect all non-empty paths from the binlog to find the common prefix.
+            var allPaths = list
+                .SelectMany(inv => new[] { inv.ProjectFilePath, inv.OutputAssemblyPath })
+                .Where(p => !string.IsNullOrEmpty(p))
+                .ToArray();
 
-            // Nothing to rebase (paths already match, or oldRoot not found).
+            var oldRoot = FindCommonPathPrefix(allPaths);
+
+            // Nothing to rebase.
             if (oldRoot == null || string.Equals(oldRoot, newLocalRoot, StringComparison.OrdinalIgnoreCase))
             {
                 return list;
@@ -140,40 +139,61 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             var oldRootRegex = new Regex(Regex.Escape(oldRoot), RegexOptions.IgnoreCase | RegexOptions.Compiled);
             var escapedNewRoot = newLocalRoot.Replace("$", "$$"); // '$' is special in Regex replacements
 
-            // Second pass: rewrite paths in parallel across all invocations.
             var result = new GenerateFromBuildLog.CompilerInvocation[list.Length];
             Parallel.For(0, list.Length, i =>
             {
                 var inv = list[i];
                 result[i] = new GenerateFromBuildLog.CompilerInvocation
                 {
-                    ProjectFilePath    = RebasePath(inv.ProjectFilePath, oldRoot, newLocalRoot),
-                    OutputAssemblyPath = RebasePath(inv.OutputAssemblyPath, oldRoot, newLocalRoot),
+                    ProjectFilePath      = RebasePath(inv.ProjectFilePath, oldRoot, newLocalRoot),
+                    OutputAssemblyPath   = RebasePath(inv.OutputAssemblyPath, oldRoot, newLocalRoot),
                     CommandLineArguments = oldRootRegex.Replace(inv.CommandLineArguments ?? string.Empty, escapedNewRoot),
-                    SolutionRoot       = inv.SolutionRoot,
-                    TypeScriptFiles    = inv.TypeScriptFiles,
-                    Language           = inv.Language,
+                    SolutionRoot         = inv.SolutionRoot,
+                    TypeScriptFiles      = inv.TypeScriptFiles,
+                    Language             = inv.Language,
                 };
             });
 
             return result;
         }
 
-        // Walk path segments looking for a folder matching repoName (case-insensitive).
-        // Returns everything up to and including that folder, e.g. "D:\work\Infra".
-        private static string FindRepoRoot(string path, string repoName)
+        // Returns the longest common directory-segment prefix shared by all paths.
+        // e.g. ["D:\agent1\work\repo\a\foo.cs", "D:\agent1\work\repo\b\bar.cs"]
+        //      returns "D:\agent1\work\repo".
+        private static string FindCommonPathPrefix(string[] paths)
         {
-            if (string.IsNullOrEmpty(path)) { return null; }
-            var normalised = path.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
-            var parts = normalised.Split(Path.DirectorySeparatorChar);
-            for (int i = 0; i < parts.Length; i++)
+            if (paths.Length == 0) { return null; }
+
+            // Normalise to backslash so segment comparison is consistent.
+            var sep = Path.DirectorySeparatorChar;
+            var splitPaths = paths
+                .Select(p => p.Replace(Path.AltDirectorySeparatorChar, sep).Split(sep))
+                .ToArray();
+
+            var first = splitPaths[0];
+            int commonLength = first.Length;
+
+            foreach (var parts in splitPaths.Skip(1))
             {
-                if (string.Equals(parts[i], repoName, StringComparison.OrdinalIgnoreCase))
+                int maxComparable = Math.Min(commonLength, parts.Length);
+                int match = 0;
+                while (match < maxComparable && string.Equals(first[match], parts[match], StringComparison.OrdinalIgnoreCase))
                 {
-                    return string.Join(Path.DirectorySeparatorChar.ToString(), parts, 0, i + 1);
+                    match++;
                 }
+                commonLength = match;
+                if (commonLength == 0) { return null; }
             }
-            return null;
+
+            // Drop the last segment if it looks like a file (has an extension).
+            // We want a directory, not a file path.
+            if (commonLength > 0 && Path.HasExtension(first[commonLength - 1]))
+            {
+                commonLength--;
+            }
+
+            if (commonLength == 0) { return null; }
+            return string.Join(sep.ToString(), first, 0, commonLength);
         }
 
         private static string RebasePath(string path, string oldRoot, string newRoot)
