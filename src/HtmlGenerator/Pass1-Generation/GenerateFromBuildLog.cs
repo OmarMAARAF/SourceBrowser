@@ -45,7 +45,27 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                         includeSourceGeneratedDocuments);
                     solutionGenerator.ServerPathMappings = serverPathMappings;
                     solutionGenerator.GlobalAssemblyList = assemblyNames;
-                    await solutionGenerator.GenerateAsync(cancellationToken, processedAssemblyList, solutionExplorerRoot);
+
+                    // Place the project in the solution explorer subfolder that reflects its
+                    // directory position relative to the binlog file, mirroring the folder
+                    // structure that .sln virtual folders provide for solution-based indexing.
+                    var targetFolder = solutionExplorerRoot;
+                    if (solutionExplorerRoot != null &&
+                        !string.IsNullOrEmpty(invocation.SolutionRoot) &&
+                        !string.IsNullOrEmpty(invocation.ProjectFilePath))
+                    {
+                        var projectDir = Path.GetDirectoryName(invocation.ProjectFilePath);
+                        var relativeDir = Paths.MakeRelativeToFolder(projectDir, invocation.SolutionRoot);
+                        var segments = relativeDir.Split(
+                            new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar },
+                            StringSplitOptions.RemoveEmptyEntries);
+                        foreach (var segment in segments)
+                        {
+                            targetFolder = targetFolder.GetOrCreateFolder(segment);
+                        }
+                    }
+
+                    await solutionGenerator.GenerateAsync(cancellationToken, processedAssemblyList, targetFolder);
                 }
                 else
                 {
