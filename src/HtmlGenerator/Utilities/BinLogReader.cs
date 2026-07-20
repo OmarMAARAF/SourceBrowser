@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.CodeAnalysis;
+using Microsoft.SourceBrowser.Common;
 using CompilerInvocation = Microsoft.SourceBrowser.HtmlGenerator.GenerateFromBuildLog.CompilerInvocation;
 
 namespace Microsoft.SourceBrowser.HtmlGenerator
@@ -122,7 +123,22 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
         {
             if (compilerInvocation.Language == LanguageNames.CSharp)
             {
-                compilerInvocation.OutputAssemblyPath = compilerInvocation.Parsed.GetOutputFilePath(compilerInvocation.Parsed.OutputFileName);
+                try
+                {
+                    var outputFileName = compilerInvocation.Parsed.OutputFileName;
+                    if (!string.IsNullOrEmpty(outputFileName))
+                    {
+                        compilerInvocation.OutputAssemblyPath = compilerInvocation.Parsed.GetOutputFilePath(outputFileName);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Can happen when the command line uses response files (@file.rsp) that only
+                    // exist on the machine that produced the binlog (e.g. a Linux build read on
+                    // Windows). The assembly path will be left null; metadata extraction is skipped
+                    // gracefully downstream.
+                    Log.Exception(ex, $"Could not determine output assembly path for: {compilerInvocation.ProjectFilePath}", isSevere: false);
+                }
             }
         }
 
