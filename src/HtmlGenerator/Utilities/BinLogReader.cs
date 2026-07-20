@@ -150,18 +150,36 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
         public static string TrimCompilerExeFromCommandLine(string commandLine, CompilerKind language)
         {
             int occurrence = -1;
+            int trimLength = 0;
+
             if (language == CompilerKind.CSharp)
             {
+                // Windows: path ends with csc.exe (e.g. "C:\...\csc.exe ")
                 occurrence = commandLine.IndexOf("csc.exe ", StringComparison.OrdinalIgnoreCase);
+                trimLength = "csc.exe ".Length;
+
+                // Linux/macOS: path ends with csc.dll (e.g. "/path/to/csc.dll ")
+                if (occurrence < 0)
+                {
+                    occurrence = commandLine.IndexOf("csc.dll ", StringComparison.OrdinalIgnoreCase);
+                    trimLength = "csc.dll ".Length;
+                }
             }
             else if (language == CompilerKind.VisualBasic)
             {
                 occurrence = commandLine.IndexOf("vbc.exe ", StringComparison.OrdinalIgnoreCase);
+                trimLength = "vbc.exe ".Length;
+
+                if (occurrence < 0)
+                {
+                    occurrence = commandLine.IndexOf("vbc.dll ", StringComparison.OrdinalIgnoreCase);
+                    trimLength = "vbc.dll ".Length;
+                }
             }
 
             if (occurrence > -1)
             {
-                commandLine = commandLine.Substring(occurrence + "csc.exe ".Length);
+                commandLine = commandLine.Substring(occurrence + trimLength);
             }
 
             return commandLine;

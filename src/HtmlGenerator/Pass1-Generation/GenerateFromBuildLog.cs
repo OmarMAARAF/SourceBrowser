@@ -54,14 +54,27 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                         !string.IsNullOrEmpty(invocation.SolutionRoot) &&
                         !string.IsNullOrEmpty(invocation.ProjectFilePath))
                     {
-                        var projectDir = Path.GetDirectoryName(invocation.ProjectFilePath);
-                        var relativeDir = Paths.MakeRelativeToFolder(projectDir, invocation.SolutionRoot);
-                        var segments = relativeDir.Split(
-                            new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar },
-                            StringSplitOptions.RemoveEmptyEntries);
-                        foreach (var segment in segments)
+                        // Normalize path separators so that paths embedded in a binlog produced
+                        // on a different OS are handled correctly. Windows paths use '\', Linux
+                        // paths use '/', and Path.GetDirectoryName on the host OS may not
+                        // recognise the foreign separator.
+                        var normalizedProjectPath = invocation.ProjectFilePath
+                            .Replace('\\', Path.DirectorySeparatorChar)
+                            .Replace('/', Path.DirectorySeparatorChar);
+                        var projectDir = Path.GetDirectoryName(normalizedProjectPath);
+                        var normalizedSolutionRoot = invocation.SolutionRoot
+                            .Replace('\\', Path.DirectorySeparatorChar)
+                            .Replace('/', Path.DirectorySeparatorChar);
+                        if (!string.IsNullOrEmpty(projectDir))
                         {
-                            targetFolder = targetFolder.GetOrCreateFolder(segment);
+                            var relativeDir = Paths.MakeRelativeToFolder(projectDir, normalizedSolutionRoot);
+                            var segments = relativeDir.Split(
+                                new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar },
+                                StringSplitOptions.RemoveEmptyEntries);
+                            foreach (var segment in segments)
+                            {
+                                targetFolder = targetFolder.GetOrCreateFolder(segment);
+                            }
                         }
                     }
 

@@ -133,22 +133,22 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 return Path.GetFileName(filePath);
             }
 
-            if (relativeToPath.EndsWith("\\", StringComparison.Ordinal))
-            {
-                relativeToPath = relativeToPath.TrimEnd('\\');
-            }
+            relativeToPath = relativeToPath.TrimEnd('\\', '/');
 
+            // Detect which separator style the paths use so the result is consistent.
+            char sep = relativeToPath.IndexOf('/') >= 0 && relativeToPath.IndexOf('\\') < 0 ? '/' : '\\';
             StringBuilder result = new StringBuilder();
             while (!IsOrContains(relativeToPath, filePath))
             {
-                result.Append(@"..\");
+                result.Append("..");
+                result.Append(sep);
                 relativeToPath = Path.GetDirectoryName(relativeToPath);
             }
 
             if (filePath.Length > relativeToPath.Length)
             {
                 filePath = filePath.Substring(relativeToPath.Length);
-                if (filePath.StartsWith("\\", StringComparison.Ordinal))
+                if (filePath[0] == '\\' || filePath[0] == '/')
                 {
                     filePath = filePath.Substring(1);
                 }
@@ -263,9 +263,13 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 return path;
             }
 
-            if (!path.EndsWith("\\", StringComparison.Ordinal))
+            char last = path[path.Length - 1];
+            if (last != '\\' && last != '/')
             {
-                path += "\\";
+                // Append the same separator already used by the path so that
+                // StartsWith comparisons work regardless of OS or path style.
+                char sep = path.IndexOf('/') >= 0 && path.IndexOf('\\') < 0 ? '/' : '\\';
+                path += sep;
             }
 
             return path;
