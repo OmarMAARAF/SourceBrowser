@@ -43,10 +43,21 @@ HtmlGenerator.exe Compile.binlog /out:... /rebase:.
 ```
 
 **How it works:**
-1. Takes the last path segment of the value you pass (e.g. `infra`) as the repository folder name.
-2. Scans the recorded `ProjectFilePath` / `OutputAssemblyPath` in the binlog to find the old machine prefix up to that folder (case-insensitive), e.g. `D:\TeamCity\SRVCLDGUSD201-2\work\infra`.
-3. Rewrites `ProjectFilePath`, `OutputAssemblyPath`, and `CommandLineArguments` (which embeds source file paths) in every invocation before indexing begins.
-4. The rewrite compiles a single `Regex` for the whole run and applies it in parallel across all invocations, so there is no measurable overhead even for very large binlogs.
+1. For every compiler invocation, it locates the recorded project file on the local disk by probing `<local-repo-root>` **and each of its immediate subfolders** for the longest matching path suffix.
+2. That probe pins down both the old machine prefix (e.g. `D:\TeamCity\SRVCLDGUSD201-2\work`) and the correct local target folder, even when repo folder names differ between agents.
+3. It then rewrites `ProjectFilePath`, `OutputAssemblyPath`, and `CommandLineArguments` (which embeds source file paths) in every invocation before indexing begins. `OutputAssemblyPath` is re-derived from the rebased command line.
+4. Results are cached per project path and applied in parallel, so there is no measurable overhead even for very large binlogs.
+5. If the sources can't be found on disk, it falls back to a best-effort longest-common-prefix rewrite onto `<local-repo-root>`.
+
+**Multiple VCS roots (e.g. TeamCity):** when several binlogs are indexed in one run and each build's sources were checked out into a *different* sibling subfolder under one parent, point `/rebase` at that parent and each binlog is relocated into its correct subfolder automatically:
+
+```
+HtmlGenerator.exe Logs_core_api\compilation.binlog Logs_model\compilation.binlog Logs\compilation.binlog ^
+    /out:... /rebase:D:\TeamCity\SRVCLDGUSD916-2\work\RdwsSourceBrowser
+```
+
+Given local checkouts `RdwsSourceBrowser\rdws-core-api`, `RdwsSourceBrowser\rdws-model`, `RdwsSourceBrowser\rdws`, each binlog's paths are rebased into the matching subfolder.
+
 
 ---
 

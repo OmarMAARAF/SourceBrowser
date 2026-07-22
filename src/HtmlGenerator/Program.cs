@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.SourceBrowser.Common;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Globalization;
@@ -111,63 +112,209 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
         /// <summary>
         /// Rewrites paths in compiler invocations extracted from a .binlog that was produced on
-        /// a different machine/agent. Detects the old root automatically by finding the longest
-        /// common path prefix shared by all recorded paths in the binlog, then replaces it with
-        /// <paramref name="newLocalRoot"/>. Works even when the repo folder names differ between agents.
+        /// a different machine/agent (or a different checkout layout on the same machine) so they
+        /// point at where the sources actually live locally.
+        ///
+        /// <para>
+        /// Detection is grounded in the real filesystem: for each invocation the recorded project
+        /// file is located under <paramref name="rebaseRoot"/> (probing the folder itself and each
+        /// of its immediate subfolders). This automatically discovers the correct "old root" and
+        /// the correct local target folder, which is what makes the multi-VCS-root TeamCity layout
+        /// work: several binlogs, each of whose sources were checked out into a different sibling
+        /// subfolder (e.g. <c>rebaseRoot\rdws-core-api</c>, <c>rebaseRoot\rdws-model</c>, ...), can
+        /// all be rebased with a single <c>/rebase:&lt;parent&gt;</c> value.
+        /// </para>
+        /// When probing finds nothing (e.g. the sources aren't present), it falls back to a
+        /// best-effort longest-common-prefix rewrite onto <paramref name="rebaseRoot"/>.
         /// </summary>
         private static GenerateFromBuildLog.CompilerInvocation[] RebaseInvocations(
             IEnumerable<GenerateFromBuildLog.CompilerInvocation> invocations,
-            string newLocalRoot)
+            string rebaseRoot)
         {
             var list = invocations.ToArray();
 
-            // Collect all non-empty paths from the binlog to find the common prefix.
-            var allPaths = list
-                .SelectMany(inv => new[] { inv.ProjectFilePath, inv.OutputAssemblyPath })
-                .Where(p => !string.IsNullOrEmpty(p))
+            // Local directories a recorded project could have been relocated into. Supports both:
+            //  * rebaseRoot IS the repository checkout (single VCS root), and
+            //  * rebaseRoot CONTAINS several sibling checkouts, one per VCS root (TeamCity with
+            //    multiple VCS roots, each mapped to its own checkout subfolder).
+            var candidateBases = GetCandidateBaseDirectories(rebaseRoot);
+
+            // Only used when filesystem probing can't locate an invocation's sources.
+            var projectPaths = list
+                .Select(inv => inv.ProjectFilePath)
+                .Where(p => !string.IsNullOrEmpty(p) && p != "-")
                 .ToArray();
+            var fallbackOldRoot = FindCommonPathPrefix(projectPaths);
 
-            var oldRoot = FindCommonPathPrefix(allPaths);
-
-            // Nothing to rebase.
-            if (oldRoot == null || string.Equals(oldRoot, newLocalRoot, StringComparison.OrdinalIgnoreCase))
-            {
-                return list;
-            }
-
-            // Pre-compile the regex and replacement string once for all invocations.
-            var oldRootRegex = new Regex(Regex.Escape(oldRoot), RegexOptions.IgnoreCase | RegexOptions.Compiled);
-            var escapedNewRoot = newLocalRoot.Replace("$", "$$"); // '$' is special in Regex replacements
+            // Probing the disk is relatively expensive, so remember the resolved mapping per
+            // distinct project path (all invocations from the same checkout share it).
+            var probeCache = new ConcurrentDictionary<string, (string OldRoot, string NewRoot)>(StringComparer.OrdinalIgnoreCase);
 
             var result = new GenerateFromBuildLog.CompilerInvocation[list.Length];
             Parallel.For(0, list.Length, i =>
             {
                 var inv = list[i];
-                result[i] = new GenerateFromBuildLog.CompilerInvocation
+
+                var (oldRoot, newRoot) = ResolveRebaseMapping(inv.ProjectFilePath, candidateBases, probeCache);
+
+                // Fall back to the old longest-common-prefix behaviour if probing failed.
+                if (oldRoot == null && fallbackOldRoot != null)
                 {
-                    ProjectFilePath      = RebasePath(inv.ProjectFilePath, oldRoot, newLocalRoot),
-                    OutputAssemblyPath   = RebasePath(inv.OutputAssemblyPath, oldRoot, newLocalRoot),
+                    oldRoot = fallbackOldRoot;
+                    newRoot = rebaseRoot;
+                }
+
+                if (oldRoot == null || string.Equals(oldRoot, newRoot, StringComparison.OrdinalIgnoreCase))
+                {
+                    result[i] = inv;
+                    return;
+                }
+
+                var oldRootRegex = new Regex(Regex.Escape(oldRoot), RegexOptions.IgnoreCase);
+
+                // The command line embeds paths using the separator style of the machine that
+                // produced the binlog (e.g. '/' for a Linux build). Only the oldRoot prefix is
+                // replaced, so the remainder keeps that style. Emit newRoot in the same style,
+                // otherwise we get mixed separators like "D:\...\RdwsSourceBrowser/rdws/..." which
+                // Roslyn's metadata reference resolver rejects ("Can't resolve metadata reference").
+                var recordedSeparator = oldRoot.IndexOf('\\') >= 0 ? '\\' : '/';
+                var newRootForCommandLine = newRoot.Replace('\\', recordedSeparator).Replace('/', recordedSeparator);
+                var escapedNewRoot = newRootForCommandLine.Replace("$", "$$"); // '$' is special in Regex replacements
+
+                var rebased = new GenerateFromBuildLog.CompilerInvocation
+                {
+                    ProjectFilePath      = RebasePath(inv.ProjectFilePath, oldRoot, newRoot),
                     CommandLineArguments = oldRootRegex.Replace(inv.CommandLineArguments ?? string.Empty, escapedNewRoot),
                     SolutionRoot         = inv.SolutionRoot,
                     TypeScriptFiles      = inv.TypeScriptFiles,
                     Language             = inv.Language,
                 };
+
+                // Re-derive the output assembly path from the rebased project directory and command
+                // line. The value coming from the binlog reader may point at a foreign filesystem
+                // (and won't share oldRoot's separator/root style, so a plain prefix rebase can't
+                // fix it). Fall back to a prefix rebase of the original value if we can't recompute.
+                rebased.OutputAssemblyPath =
+                    RecomputeOutputAssemblyPath(rebased)
+                    ?? RebasePath(inv.OutputAssemblyPath, oldRoot, newRoot);
+
+                result[i] = rebased;
             });
 
             return result;
         }
 
-        // Returns the longest common directory-segment prefix shared by all paths.
+        // Returns rebaseRoot plus its immediate subdirectories. The subdirectories cover the layout
+        // where several VCS roots are checked out as siblings under one parent folder.
+        private static string[] GetCandidateBaseDirectories(string rebaseRoot)
+        {
+            var bases = new List<string> { rebaseRoot };
+            try
+            {
+                if (Directory.Exists(rebaseRoot))
+                {
+                    bases.AddRange(Directory.GetDirectories(rebaseRoot));
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Exception(ex, $"Could not enumerate rebase subdirectories under: {rebaseRoot}", isSevere: false);
+            }
+
+            return bases.ToArray();
+        }
+
+        // Locates where the recorded project file actually lives locally by probing each candidate
+        // base directory for the longest matching path suffix. Returns (oldRoot, newRoot) such that
+        // replacing oldRoot with newRoot at the start of any path recorded by the same build yields
+        // its correct local location, or (null, null) if the project could not be found.
+        private static (string OldRoot, string NewRoot) ResolveRebaseMapping(
+            string projectFilePath,
+            string[] candidateBases,
+            ConcurrentDictionary<string, (string OldRoot, string NewRoot)> probeCache)
+        {
+            if (string.IsNullOrEmpty(projectFilePath) || projectFilePath == "-")
+            {
+                return (null, null);
+            }
+
+            return probeCache.GetOrAdd(projectFilePath, p => ProbeRebaseMapping(p, candidateBases));
+        }
+
+        private static (string OldRoot, string NewRoot) ProbeRebaseMapping(string projectFilePath, string[] candidateBases)
+        {
+            var segments = projectFilePath.Split(PathSeparators);
+
+            string bestOldRoot = null;
+            string bestNewRoot = null;
+            int bestSuffixSegmentCount = -1;
+
+            foreach (var baseDir in candidateBases)
+            {
+                // Try the longest suffix first (i == 1). The first suffix that exists under this
+                // base is the longest one, so we can stop probing this base immediately.
+                for (int i = 1; i < segments.Length; i++)
+                {
+                    var suffix = string.Join(Path.DirectorySeparatorChar.ToString(), segments.Skip(i));
+                    var candidate = Path.Combine(baseDir, suffix);
+                    if (File.Exists(candidate))
+                    {
+                        int suffixSegmentCount = segments.Length - i;
+                        if (suffixSegmentCount > bestSuffixSegmentCount)
+                        {
+                            bestSuffixSegmentCount = suffixSegmentCount;
+                            bestNewRoot = baseDir;
+                            bestOldRoot = ReconstructPrefix(projectFilePath, i);
+                        }
+
+                        break;
+                    }
+                }
+            }
+
+            return (bestOldRoot, bestNewRoot);
+        }
+
+        // Returns the prefix of <paramref name="path"/> that precedes its <paramref name="leadingSegments"/>-th
+        // separator, i.e. the portion made up of the first <paramref name="leadingSegments"/> segments,
+        // with the original separators preserved and no trailing separator.
+        private static string ReconstructPrefix(string path, int leadingSegments)
+        {
+            int sepCount = 0;
+            int prefixEnd = path.Length;
+            for (int i = 0; i < path.Length; i++)
+            {
+                if (path[i] == '\\' || path[i] == '/')
+                {
+                    sepCount++;
+                    if (sepCount == leadingSegments)
+                    {
+                        prefixEnd = i;
+                        break;
+                    }
+                }
+            }
+
+            return path.Substring(0, prefixEnd);
+        }
+
+
+        // Both '\' and '/' are always treated as separators regardless of the OS this tool
+        // runs on. Otherwise a Windows-produced binlog (backslash paths) read on Linux/macOS
+        // would never split into segments, the common prefix would collapse, and rebasing would
+        // silently no-op.
+        private static readonly char[] PathSeparators = { '\\', '/' };
+
+        // Returns the longest common directory-segment prefix shared by all paths, preserving the
+        // original separators of the recorded paths so it can be matched back against them.
         // e.g. ["D:\agent1\work\repo\a\foo.cs", "D:\agent1\work\repo\b\bar.cs"]
         //      returns "D:\agent1\work\repo".
         private static string FindCommonPathPrefix(string[] paths)
         {
             if (paths.Length == 0) { return null; }
 
-            // Normalise to backslash so segment comparison is consistent.
-            var sep = Path.DirectorySeparatorChar;
             var splitPaths = paths
-                .Select(p => p.Replace(Path.AltDirectorySeparatorChar, sep).Split(sep))
+                .Select(p => p.Split(PathSeparators))
                 .ToArray();
 
             var first = splitPaths[0];
@@ -193,7 +340,26 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             }
 
             if (commonLength == 0) { return null; }
-            return string.Join(sep.ToString(), first, 0, commonLength);
+
+            // Reconstruct the prefix from the original first path so its separators (which may be
+            // '\' on a foreign-OS binlog) are preserved exactly for later prefix matching.
+            var firstPath = paths[0];
+            int sepCount = 0;
+            int prefixEnd = firstPath.Length;
+            for (int i = 0; i < firstPath.Length; i++)
+            {
+                if (firstPath[i] == '\\' || firstPath[i] == '/')
+                {
+                    sepCount++;
+                    if (sepCount == commonLength)
+                    {
+                        prefixEnd = i;
+                        break;
+                    }
+                }
+            }
+
+            return firstPath.Substring(0, prefixEnd);
         }
 
         private static string RebasePath(string path, string oldRoot, string newRoot)
@@ -201,9 +367,41 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             if (string.IsNullOrEmpty(path)) { return path; }
             if (path.StartsWith(oldRoot, StringComparison.OrdinalIgnoreCase))
             {
-                return newRoot + path.Substring(oldRoot.Length);
+                // Normalise the remaining separators to the local OS so the rebased path resolves
+                // on this machine (e.g. a Windows binlog's '\' segments become '/' on Linux).
+                var remainder = path.Substring(oldRoot.Length)
+                    .Replace('\\', Path.DirectorySeparatorChar)
+                    .Replace('/', Path.DirectorySeparatorChar);
+                return newRoot + remainder;
             }
             return path;
+        }
+
+        // Re-parses the (already rebased) command line to determine where the output assembly would
+        // live on the local machine. Returns null when it can't be determined (e.g. TypeScript
+        // invocations, response files that only exist on the build agent, or parse failures), in
+        // which case the caller falls back to a best-effort prefix rebase of the recorded value.
+        private static string RecomputeOutputAssemblyPath(GenerateFromBuildLog.CompilerInvocation invocation)
+        {
+            if (string.IsNullOrEmpty(invocation.ProjectFilePath) || invocation.ProjectFilePath == "-")
+            {
+                return null;
+            }
+
+            try
+            {
+                var outputFileName = invocation.Parsed.OutputFileName;
+                if (!string.IsNullOrEmpty(outputFileName))
+                {
+                    return invocation.Parsed.GetOutputFilePath(outputFileName);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Exception(ex, $"Could not recompute output assembly path after rebasing: {invocation.ProjectFilePath}", isSevere: false);
+            }
+
+            return null;
         }
 
         private static readonly Folder<ProjectSkeleton> mergedSolutionExplorerRoot = new Folder<ProjectSkeleton>();
