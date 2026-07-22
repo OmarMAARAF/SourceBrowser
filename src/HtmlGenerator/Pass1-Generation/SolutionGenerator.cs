@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -435,22 +434,41 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             var currentBatch = new List<Project>();
             foreach (var project in projectsToProcess)
             {
-                if (processedAssemblyList == null || processedAssemblyList.Add(project.AssemblyName))
+                if (processedAssemblyList == null)
                 {
+                    // No cross-invocation tracking (single project / metadata-as-source path): index as-is.
                     currentBatch.Add(project);
+                    continue;
                 }
-                else if (AllowDuplicateAssemblies)
+
+                var resolvedName = AssemblyNameDeduplicator.Resolve(
+                    project.AssemblyName,
+                    processedAssemblyList,
+                    AllowDuplicateAssemblies);
+
+                if (resolvedName == null)
                 {
-                    var uniqueName = GetUniqueAssemblyName(project.AssemblyName, processedAssemblyList);
-                    assemblyNameOverrides[project.Id] = uniqueName;
-                    currentBatch.Add(project);
+                    // Duplicate assembly name and duplicates are not allowed: skip, but say why so the
+                    // dropped project isn't a silent mystery.
+                    Log.Message(string.Format(
+                        "Skipping project '{0}': assembly '{1}' was already indexed. Pass /allowduplicateassemblies to index it under a separate folder.",
+                        project.FilePath,
+                        project.AssemblyName));
+                    continue;
+                }
+
+                if (resolvedName != project.AssemblyName)
+                {
+                    // Duplicate that we're keeping: relocate it to a unique folder.
+                    assemblyNameOverrides[project.Id] = resolvedName;
                     Log.Message(string.Format(
                         "Assembly '{0}' was already indexed; indexing duplicate project '{1}' as '{2}'.",
                         project.AssemblyName,
                         project.FilePath,
-                        uniqueName));
+                        resolvedName));
                 }
-                // else: default behavior - a project with this assembly name already won, skip it.
+
+                currentBatch.Add(project);
             }
 
             foreach (var project in currentBatch)
@@ -484,22 +502,6 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 cancellationToken);
 
             return currentBatch.Count < projectsToProcess.Length;
-        }
-
-        /// <summary>
-        /// Produces an assembly/folder name derived from <paramref name="baseName"/> that is not yet
-        /// present in <paramref name="processedAssemblyList"/>, reserving it by adding it to the set.
-        /// </summary>
-        private static string GetUniqueAssemblyName(string baseName, HashSet<string> processedAssemblyList)
-        {
-            for (int i = 2; ; i++)
-            {
-                var candidate = baseName + "_" + i.ToString(CultureInfo.InvariantCulture);
-                if (processedAssemblyList.Add(candidate))
-                {
-                    return candidate;
-                }
-            }
         }
 
         private static bool IsTestProject(Project proj)
