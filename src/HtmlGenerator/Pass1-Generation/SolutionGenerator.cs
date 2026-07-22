@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
@@ -86,6 +88,12 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
         public static bool LoadPlugins { get; set; }
         public static bool ExcludeTests { get; set; }
+
+        /// <summary>
+        /// When multiple projects share the same assembly short name, index the duplicates under a
+        /// unique folder name (e.g. Foo_2) instead of dropping all but the first one.
+        /// </summary>
+        public static bool AllowDuplicateAssemblies { get; set; }
 
         private void SetupPluginAggregator()
         {
@@ -169,6 +177,15 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             string outputAssemblyPath)
         {
             var workspace = CreateWorkspace();
+
+            // References/analyzers recorded in the binlog may point at files that don't exist on
+            // this machine (e.g. NuGet/SDK assemblies under a Linux build agent's
+            // '/opt/buildagent/system/dotnet/.nuget/...' path when indexing on Windows). Roslyn's
+            // CommandLineProject.CreateProjectInfo throws ArgumentException ("Can't resolve
+            // metadata reference") and aborts the whole project before SourceBrowser's later
+            // RemoveNonExistingReferences filter can run, so strip those switches up front.
+            commandLineArguments = RemoveNonExistentReferencesFromCommandLine(commandLineArguments, projectSourceFolder);
+
             var projectInfo = CommandLineProject.CreateProjectInfo(
                 projectName,
                 language,
@@ -185,6 +202,70 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             solution.Workspace.RegisterWorkspaceFailedHandler(args => WorkspaceFailed(args, solution.Workspace));
 
             return solution;
+        }
+
+        // Matches the file-resolving compiler switches whose targets Roslyn insists on resolving
+        // eagerly (and throws on if missing): references, linked (embed-interop) references and
+        // analyzers, in both their long and short forms.
+        private static readonly Regex ReferenceSwitchRegex = new Regex(
+            @"(?<switch>/(?:reference|r|link|l|analyzer|a):)(?:(?<alias>\w+)=)?(?:""(?<path>[^""]*)""|(?<path>[^""\s]+))",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+        /// <summary>
+        /// Removes reference/link/analyzer switches from a compiler command line when the file they
+        /// point at does not exist locally. This lets binlogs produced on another machine (where
+        /// NuGet/SDK assemblies live at foreign, non-rebasable paths) be indexed without Roslyn
+        /// aborting the project during <see cref="CommandLineProject.CreateProjectInfo"/>.
+        /// </summary>
+        private static string RemoveNonExistentReferencesFromCommandLine(string commandLineArguments, string projectSourceFolder)
+        {
+            if (string.IsNullOrEmpty(commandLineArguments))
+            {
+                return commandLineArguments;
+            }
+
+            return ReferenceSwitchRegex.Replace(commandLineArguments, match =>
+            {
+                // A single switch may list several comma-separated paths; keep only the ones that
+                // exist locally and drop the switch entirely if none survive.
+                var paths = match.Groups["path"].Value.Split(',');
+                var existing = paths.Where(p => ReferenceFileExists(p, projectSourceFolder)).ToArray();
+
+                if (existing.Length == 0)
+                {
+                    return string.Empty;
+                }
+
+                if (existing.Length == paths.Length)
+                {
+                    return match.Value;
+                }
+
+                var alias = match.Groups["alias"].Success ? match.Groups["alias"].Value + "=" : string.Empty;
+                var rebuiltPaths = string.Join(",", existing.Select(p => p.IndexOf(' ') >= 0 ? "\"" + p + "\"" : p));
+                return match.Groups["switch"].Value + alias + rebuiltPaths;
+            });
+        }
+
+        private static bool ReferenceFileExists(string path, string projectSourceFolder)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                return false;
+            }
+
+            try
+            {
+                var resolved = Path.IsPathRooted(path)
+                    ? path
+                    : Path.Combine(projectSourceFolder ?? string.Empty, path);
+                return File.Exists(resolved);
+            }
+            catch
+            {
+                // Malformed path (e.g. foreign-OS characters). Treat as non-existent so it's dropped.
+                return false;
+            }
         }
 
         private static Solution DisambiguateSameNameLinkedFiles(Solution solution)
@@ -343,21 +424,47 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             }
 
             var projectsToProcess = allProjects
-                .Where(p => processedAssemblyList == null || processedAssemblyList.Add(p.AssemblyName))
                 .Where(p => !ExcludeTests || !IsTestProject(p))
                 .ToArray();
-            var currentBatch = projectsToProcess
-                .ToArray();
+
+            // Maps a project to the folder/assembly name it should be indexed under. Only populated
+            // for duplicates when AllowDuplicateAssemblies is set; the default (non-duplicate) name
+            // is used otherwise.
+            var assemblyNameOverrides = new Dictionary<ProjectId, string>();
+
+            var currentBatch = new List<Project>();
+            foreach (var project in projectsToProcess)
+            {
+                if (processedAssemblyList == null || processedAssemblyList.Add(project.AssemblyName))
+                {
+                    currentBatch.Add(project);
+                }
+                else if (AllowDuplicateAssemblies)
+                {
+                    var uniqueName = GetUniqueAssemblyName(project.AssemblyName, processedAssemblyList);
+                    assemblyNameOverrides[project.Id] = uniqueName;
+                    currentBatch.Add(project);
+                    Log.Message(string.Format(
+                        "Assembly '{0}' was already indexed; indexing duplicate project '{1}' as '{2}'.",
+                        project.AssemblyName,
+                        project.FilePath,
+                        uniqueName));
+                }
+                // else: default behavior - a project with this assembly name already won, skip it.
+            }
+
             foreach (var project in currentBatch)
             {
                 try
                 {
-                    CurrentAssemblyName = project.AssemblyName;
+                    assemblyNameOverrides.TryGetValue(project.Id, out var assemblyNameOverride);
+                    var effectiveAssemblyName = assemblyNameOverride ?? project.AssemblyName;
+                    CurrentAssemblyName = effectiveAssemblyName;
 
-                    var generator = new ProjectGenerator(this, project);
+                    var generator = new ProjectGenerator(this, project, assemblyNameOverride);
                     await generator.GenerateAsync();
 
-                    File.AppendAllText(Paths.ProcessedAssemblies, project.AssemblyName + Environment.NewLine, Encoding.UTF8);
+                    File.AppendAllText(Paths.ProcessedAssemblies, effectiveAssemblyName + Environment.NewLine, Encoding.UTF8);
                 }
                 finally
                 {
@@ -373,9 +480,26 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             await AddProjectsToSolutionExplorerAsync(
                 solutionExplorerRoot,
                 currentBatch,
+                assemblyNameOverrides,
                 cancellationToken);
 
-            return currentBatch.Length < projectsToProcess.Length;
+            return currentBatch.Count < projectsToProcess.Length;
+        }
+
+        /// <summary>
+        /// Produces an assembly/folder name derived from <paramref name="baseName"/> that is not yet
+        /// present in <paramref name="processedAssemblyList"/>, reserving it by adding it to the set.
+        /// </summary>
+        private static string GetUniqueAssemblyName(string baseName, HashSet<string> processedAssemblyList)
+        {
+            for (int i = 2; ; i++)
+            {
+                var candidate = baseName + "_" + i.ToString(CultureInfo.InvariantCulture);
+                if (processedAssemblyList.Add(candidate))
+                {
+                    return candidate;
+                }
+            }
         }
 
         private static bool IsTestProject(Project proj)

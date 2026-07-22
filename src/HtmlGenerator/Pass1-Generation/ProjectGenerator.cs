@@ -14,6 +14,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
     public partial class ProjectGenerator
     {
         private readonly string assemblyAttributesFileName;
+        private readonly string assemblyNameOverride;
 
         public Project Project { get; private set; }
         public Dictionary<string, List<Tuple<string, long>>> SymbolIDToListOfLocationsMap { get; private set; }
@@ -30,10 +31,11 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
         public IEnumerable<MEF.ISymbolVisitor> PluginSymbolVisitors { get; private set; }
         public IEnumerable<MEF.ITextVisitor> PluginTextVisitors { get; private set; }
 
-        public ProjectGenerator(SolutionGenerator solutionGenerator, Project project) : this()
+        public ProjectGenerator(SolutionGenerator solutionGenerator, Project project, string assemblyNameOverride = null) : this()
         {
             this.SolutionGenerator = solutionGenerator;
             this.Project = project;
+            this.assemblyNameOverride = assemblyNameOverride;
             this.ProjectFilePath = project.FilePath ?? solutionGenerator.ProjectFilePath;
             this.DeclaredSymbols = new Dictionary<ISymbol, string>(SymbolEqualityComparer.Default);
             this.BaseMembers = new Dictionary<ISymbol, ISymbol>(SymbolEqualityComparer.Default);
@@ -263,7 +265,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 return null;
             }
 
-            AssemblyName = SymbolIdService.GetAssemblyId(assemblyName);
+            AssemblyName = assemblyNameOverride ?? SymbolIdService.GetAssemblyId(assemblyName);
             string subfolder = Path.Combine(solutionDestinationPath, AssemblyName);
             return subfolder;
         }

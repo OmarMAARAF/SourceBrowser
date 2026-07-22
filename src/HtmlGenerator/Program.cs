@@ -31,6 +31,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             Paths.SolutionDestinationFolder = options.SolutionDestinationFolder;
             SolutionGenerator.LoadPlugins = options.LoadPlugins;
             SolutionGenerator.ExcludeTests = options.ExcludeTests;
+            SolutionGenerator.AllowDuplicateAssemblies = options.AllowDuplicateAssemblies;
 
             AssertTraceListener.Register();
             AppDomain.CurrentDomain.FirstChanceException += FirstChanceExceptionHandler.HandleFirstChanceException;
@@ -106,6 +107,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 + "[/assemblylist]"
                 + "[/excludetests]" 
                 + "[/excludeSourceGeneratedDocuments]"
+                + "[/allowduplicateassemblies]"
                 + "[/rebase:<localreporoot>] "
                 + "Plugins are now off by default.");
         }

@@ -14,7 +14,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 {
     partial class SolutionGenerator
     {
-        public async Task AddProjectsToSolutionExplorerAsync(Folder root, IEnumerable<Project> projects, CancellationToken cancellationToken)
+        public async Task AddProjectsToSolutionExplorerAsync(Folder root, IEnumerable<Project> projects, IReadOnlyDictionary<ProjectId, string> assemblyNameOverrides, CancellationToken cancellationToken)
         {
             Dictionary<string, IEnumerable<string>> projectToSolutionFolderMap = null;
             if (!Configuration.FlattenSolutionExplorer)
@@ -24,18 +24,22 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
             foreach (var project in projects)
             {
+                string assemblyName = null;
+                assemblyNameOverrides?.TryGetValue(project.Id, out assemblyName);
+                assemblyName ??= project.AssemblyName;
+
                 if (Configuration.FlattenSolutionExplorer)
                 {
-                    AddProjectToFolder(root, project);
+                    AddProjectToFolder(root, project, assemblyName);
                 }
                 else
                 {
-                    AddProjectToFolder(root, project, projectToSolutionFolderMap);
+                    AddProjectToFolder(root, project, assemblyName, projectToSolutionFolderMap);
                 }
             }
         }
 
-        private void AddProjectToFolder(Folder root, Project project, Dictionary<string, IEnumerable<string>> projectToSolutionFolderMap)
+        private void AddProjectToFolder(Folder root, Project project, string assemblyName, Dictionary<string, IEnumerable<string>> projectToSolutionFolderMap)
         {
             var fullPath = project.FilePath;
             IEnumerable<string> folders = null;
@@ -44,19 +48,19 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             // because Roslyn might add more projects from project references that aren't mentioned
             // in the .sln/.slnx
             projectToSolutionFolderMap?.TryGetValue(fullPath, out folders);
-            AddProjectToFolder(root, project, folders);
+            AddProjectToFolder(root, project, assemblyName, folders);
         }
 
-        private void AddProjectToFolder(Folder folder, Project project, IEnumerable<string> folders = null)
+        private void AddProjectToFolder(Folder folder, Project project, string assemblyName, IEnumerable<string> folders = null)
         {
             if (folders == null || !folders.Any())
             {
-                folder.Add(new ProjectSkeleton(project.AssemblyName, project.Name));
+                folder.Add(new ProjectSkeleton(assemblyName, project.Name));
             }
             else
             {
                 var subfolder = folder.GetOrCreateFolder(folders.First());
-                AddProjectToFolder(subfolder, project, folders.Skip(1));
+                AddProjectToFolder(subfolder, project, assemblyName, folders.Skip(1));
             }
         }
 
