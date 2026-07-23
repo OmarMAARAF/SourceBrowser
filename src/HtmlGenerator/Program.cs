@@ -472,6 +472,17 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                         {
                             invocations = RebaseInvocations(invocations, binlogRebasePath);
                         }
+
+                        // Diagnostic: for cross-binlog debugging we want to be able to see exactly
+                        // which invocations each binlog contributed and their assembly names, so a
+                        // "missing" project can be traced back to the reader vs the indexer.
+                        Log.Message(string.Format(
+                            "Binlog '{0}' produced {1} invocation(s): {2}",
+                            path,
+                            invocations.Length,
+                            string.Join(", ", invocations.Select(inv =>
+                                (inv.AssemblyName ?? "<no-assembly>") + " (" + (inv.ProjectFilePath ?? "-") + ")"))));
+
                         foreach (var invocation in invocations)
                         {
                             await GenerateFromBuildLog.GenerateInvocationAsync(

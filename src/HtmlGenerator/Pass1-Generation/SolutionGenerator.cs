@@ -422,6 +422,15 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 Log.Exception("Solution " + this.ProjectFilePath + " has 0 projects - this is suspicious");
             }
 
+            // Diagnostic: report every project name/assembly Roslyn actually loaded so a
+            // duplicate-assembly-name project can't disappear silently between binlog read and
+            // indexer.
+            Log.Message(string.Format(
+                "SolutionGenerator '{0}' loaded {1} project(s): {2}",
+                this.ProjectFilePath,
+                allProjects.Length,
+                string.Join(", ", allProjects.Select(p => (p.AssemblyName ?? "<none>") + " [" + (p.FilePath ?? "-") + "]"))));
+
             var projectsToProcess = allProjects
                 .Where(p => !ExcludeTests || !IsTestProject(p))
                 .ToArray();
