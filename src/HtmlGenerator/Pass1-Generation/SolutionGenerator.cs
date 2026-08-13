@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
@@ -210,6 +211,34 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             @"(?<switch>/(?:reference|r|link|l|analyzer|a):)(?:(?<alias>\w+)=)?(?:""(?<path>[^""]*)""|(?<path>[^""\s]+))",
             RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
+        // Maps an assembly short name to an existing local output DLL, built from the binlog
+        // invocations' own outputs. Used to redirect a project's /reference: switch when the path
+        // the build recorded (typically a sibling project's obj/ output, or a foreign build-agent
+        // path) is absent locally but the same assembly's bin/ DLL was supplied. Without this,
+        // such references get dropped and Roslyn can't bind cross-project symbols, so cross-
+        // assembly "find all references" comes up empty. Deliberately separate from
+        // MetadataReading's AssemblyNameToFilePathMap so the metadata-as-source path is unaffected.
+        public static readonly ConcurrentDictionary<string, string> LocalReferenceAssemblyMap =
+            new ConcurrentDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+        // Records a binlog invocation's output assembly (resolving obj->bin when only the bin copy
+        // was supplied) so its DLL can later stand in for missing /reference: paths to it.
+        public static void RegisterLocalOutputAssembly(string outputAssemblyPath)
+        {
+            if (string.IsNullOrEmpty(outputAssemblyPath))
+            {
+                return;
+            }
+
+            var resolved = File.Exists(outputAssemblyPath)
+                ? outputAssemblyPath
+                : TryResolveFromBinFolder(outputAssemblyPath);
+            if (resolved != null)
+            {
+                LocalReferenceAssemblyMap[Path.GetFileNameWithoutExtension(resolved)] = resolved;
+            }
+        }
+
         /// <summary>
         /// Removes reference/link/analyzer switches from a compiler command line when the file they
         /// point at does not exist locally. This lets binlogs produced on another machine (where
@@ -225,25 +254,65 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
             return ReferenceSwitchRegex.Replace(commandLineArguments, match =>
             {
-                // A single switch may list several comma-separated paths; keep only the ones that
-                // exist locally and drop the switch entirely if none survive.
+                // A single switch may list several comma-separated paths.
                 var paths = match.Groups["path"].Value.Split(',');
-                var existing = paths.Where(p => ReferenceFileExists(p, projectSourceFolder)).ToArray();
 
-                if (existing.Length == 0)
-                {
-                    return string.Empty;
-                }
-
-                if (existing.Length == paths.Length)
+                // Fast path: everything the build recorded is present locally, leave it untouched.
+                if (paths.All(p => ReferenceFileExists(p, projectSourceFolder)))
                 {
                     return match.Value;
                 }
 
+                // Otherwise keep paths that exist, redirect missing ones to the local bin/ DLL of
+                // the same assembly (sibling projects in a single binlog reference each other's
+                // unshipped obj/ outputs), and drop only those we genuinely can't locate.
+                var resolved = paths
+                    .Select(p => ResolveReferencePath(p, projectSourceFolder))
+                    .Where(p => p != null)
+                    .ToArray();
+
+                if (resolved.Length == 0)
+                {
+                    return string.Empty;
+                }
+
                 var alias = match.Groups["alias"].Success ? match.Groups["alias"].Value + "=" : string.Empty;
-                var rebuiltPaths = string.Join(",", existing.Select(p => p.IndexOf(' ') >= 0 ? "\"" + p + "\"" : p));
+                var rebuiltPaths = string.Join(",", resolved.Select(p => p.IndexOf(' ') >= 0 ? "\"" + p + "\"" : p));
                 return match.Groups["switch"].Value + alias + rebuiltPaths;
             });
+        }
+
+        // Returns the local path Roslyn should use for a recorded reference path: the path itself
+        // if it exists, otherwise the same assembly's supplied bin/ DLL, or null if neither is
+        // available (in which case the reference is dropped).
+        private static string ResolveReferencePath(string path, string projectSourceFolder)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                return null;
+            }
+
+            try
+            {
+                var resolved = Path.IsPathRooted(path)
+                    ? path
+                    : Path.Combine(projectSourceFolder ?? string.Empty, path);
+                if (File.Exists(resolved))
+                {
+                    return resolved;
+                }
+            }
+            catch
+            {
+                // Malformed path (e.g. foreign-OS characters); fall through to the map lookup.
+            }
+
+            if (LocalReferenceAssemblyMap.TryGetValue(Path.GetFileNameWithoutExtension(path), out var localPath))
+            {
+                return localPath;
+            }
+
+            return null;
         }
 
         private static bool ReferenceFileExists(string path, string projectSourceFolder)
@@ -354,8 +423,16 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
         {
             if (!File.Exists(outputAssemblyPath))
             {
-                Log.Exception("AddAssemblyAttributesFile: assembly doesn't exist: " + outputAssemblyPath);
-                return solution;
+                // Builds that only collect the bin/ folder don't ship the obj/ copy the binlog
+                // recorded, so look for the same assembly under bin/<tfm>/ before giving up.
+                var binFallback = TryResolveFromBinFolder(outputAssemblyPath);
+                if (binFallback == null)
+                {
+                    Log.Exception("AddAssemblyAttributesFile: assembly doesn't exist: " + outputAssemblyPath);
+                    return solution;
+                }
+
+                outputAssemblyPath = binFallback;
             }
 
             var assemblyAttributesFileText = MetadataReading.GetAssemblyAttributesFileText(
@@ -379,6 +456,57 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             }
 
             return solution;
+        }
+        // Caches the discovered bin folder per obj tree so the path work runs once instead of for
+        // every assembly. Keyed by the path segment before "obj", value is the sibling "bin" folder.
+        private static readonly ConcurrentDictionary<string, string> binFolderCache =
+            new ConcurrentDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+        private static string TryResolveFromBinFolder(string outputAssemblyPath)
+        {
+            if (string.IsNullOrEmpty(outputAssemblyPath))
+            {
+                return null;
+            }
+
+            var fileName = Path.GetFileName(outputAssemblyPath);
+            var frameworkFolder = Path.GetDirectoryName(outputAssemblyPath);
+            var targetFramework = Path.GetFileName(frameworkFolder); // e.g. net471
+
+            var binFolder = GetBinFolder(frameworkFolder);
+            if (binFolder == null)
+            {
+                return null;
+            }
+
+            // Preferred layout: bin/<tfm>/<file>.dll; fall back to a flat bin/<file>.dll.
+            var candidate = Path.Combine(binFolder, targetFramework, fileName);
+            if (File.Exists(candidate))
+            {
+                return candidate;
+            }
+
+            candidate = Path.Combine(binFolder, fileName);
+            return File.Exists(candidate) ? candidate : null;
+        }
+
+        private static string GetBinFolder(string frameworkFolder)
+        {
+            if (frameworkFolder == null)
+            {
+                return null;
+            }
+
+            // The bin/ copy sits next to obj/, so cut the path at the "obj" folder and swap in "bin".
+            var objSegment = Path.DirectorySeparatorChar + "obj" + Path.DirectorySeparatorChar;
+            var index = frameworkFolder.IndexOf(objSegment, StringComparison.OrdinalIgnoreCase);
+            if (index < 0)
+            {
+                return null;
+            }
+
+            var repoRoot = frameworkFolder.Substring(0, index);
+            return binFolderCache.GetOrAdd(repoRoot, root => Path.Combine(root, "bin"));
         }
 
         private static Solution DeduplicateProjectReferences(Solution solution)

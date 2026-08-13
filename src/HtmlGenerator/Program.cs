@@ -483,6 +483,15 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                             string.Join(", ", invocations.Select(inv =>
                                 (inv.AssemblyName ?? "<no-assembly>") + " (" + (inv.ProjectFilePath ?? "-") + ")"))));
 
+                        // Record each project's output DLL so a reference to it from a sibling
+                        // project can be redirected to the local (bin/) copy when the path the
+                        // build recorded isn't present locally. This lets Roslyn bind cross-project
+                        // symbols so cross-assembly references are captured.
+                        foreach (var invocation in invocations)
+                        {
+                            SolutionGenerator.RegisterLocalOutputAssembly(invocation.OutputAssemblyPath);
+                        }
+
                         foreach (var invocation in invocations)
                         {
                             await GenerateFromBuildLog.GenerateInvocationAsync(
