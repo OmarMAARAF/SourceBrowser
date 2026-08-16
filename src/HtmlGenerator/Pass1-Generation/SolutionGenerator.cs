@@ -237,6 +237,10 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             {
                 LocalReferenceAssemblyMap[Path.GetFileNameWithoutExtension(resolved)] = resolved;
             }
+            else
+            {
+                Log.Message("RegisterLocalOutputAssembly: could not locate DLL for " + outputAssemblyPath);
+            }
         }
 
         /// <summary>
@@ -267,7 +271,19 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 // the same assembly (sibling projects in a single binlog reference each other's
                 // unshipped obj/ outputs), and drop only those we genuinely can't locate.
                 var resolved = paths
-                    .Select(p => ResolveReferencePath(p, projectSourceFolder))
+                    .Select(p =>
+                    {
+                        var r = ResolveReferencePath(p, projectSourceFolder);
+                        if (r == null)
+                        {
+                            Log.Message("DROPPED reference (not found locally, no substitute): " + p);
+                        }
+                        else if (!string.Equals(r, p, StringComparison.OrdinalIgnoreCase))
+                        {
+                            Log.Message("REDIRECTED reference: " + p + " -> " + r);
+                        }
+                        return r;
+                    })
                     .Where(p => p != null)
                     .ToArray();
 
@@ -470,24 +486,14 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             }
 
             var fileName = Path.GetFileName(outputAssemblyPath);
-            var frameworkFolder = Path.GetDirectoryName(outputAssemblyPath);
-            var targetFramework = Path.GetFileName(frameworkFolder); // e.g. net471
-
-            var binFolder = GetBinFolder(frameworkFolder);
-            if (binFolder == null)
+            var binFolder = GetBinFolder(Path.GetDirectoryName(outputAssemblyPath));
+            if (binFolder == null || !Directory.Exists(binFolder))
             {
                 return null;
             }
 
-            // Preferred layout: bin/<tfm>/<file>.dll; fall back to a flat bin/<file>.dll.
-            var candidate = Path.Combine(binFolder, targetFramework, fileName);
-            if (File.Exists(candidate))
-            {
-                return candidate;
-            }
-
-            candidate = Path.Combine(binFolder, fileName);
-            return File.Exists(candidate) ? candidate : null;
+            // Search recursively so any bin/<platform>/<config>/<tfm>/... layout is covered.
+            return Directory.EnumerateFiles(binFolder, fileName, SearchOption.AllDirectories).FirstOrDefault();
         }
 
         private static string GetBinFolder(string frameworkFolder)

@@ -24,8 +24,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             bool excludeTests,
             string rootPath,
             bool includeSourceGeneratedDocuments,
-            bool allowDuplicateAssemblies,
-            string binlogRebasePath = null)
+            string binlogReplacementRootPath = null)
         {
             SolutionDestinationFolder = solutionDestinationFolder;
             Projects = projects;
@@ -42,8 +41,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             ExcludeTests = excludeTests;
             RootPath = rootPath;
             IncludeSourceGeneratedDocuments = includeSourceGeneratedDocuments;
-            AllowDuplicateAssemblies = allowDuplicateAssemblies;
-            BinlogRebasePath = binlogRebasePath;
+            BinlogReplacementRootPath = binlogReplacementRootPath;
         }
 
         public string SolutionDestinationFolder { get; }
@@ -61,18 +59,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
         public bool LoadPlugins { get; }
         public bool ExcludeTests { get; }
         public string RootPath { get; }
-        /// <summary>
-        /// When multiple projects/binlogs share the same assembly short name, index all of them by
-        /// giving the later duplicates a unique folder name (e.g. Foo_2) instead of silently
-        /// dropping them. Note that inbound cross-assembly references still resolve by short name
-        /// and therefore point at the first project with that name.
-        /// </summary>
-        public bool AllowDuplicateAssemblies { get; }
-        /// <summary>
         /// Local root of the repository used when the .binlog was produced on a different machine.
-        /// e.g. /rebase:D:\work\infra  or  /rebase:.  (uses current directory)
-        /// </summary>
-        public string BinlogRebasePath { get; }
+        public string BinlogReplacementRootPath { get; }
 
         public static CommandLineOptions Parse(params string[] args)
         {
@@ -90,9 +78,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             var loadPlugins = false;
             var excludeTests = false;
             var includeSourceGeneratedDocuments = true;
-            var allowDuplicateAssemblies = false;
             var rootPath = (string)null;
-            var binlogRebasePath = (string)null;
+            var binlogReplacementRootPath = (string)null;
 
             foreach (var arg in args)
             {
@@ -243,21 +230,15 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     continue;
                 }
 
-                if (string.Equals(arg, "/allowduplicateassemblies", StringComparison.OrdinalIgnoreCase))
-                {
-                    allowDuplicateAssemblies = true;
-                    continue;
-                }
-
                 if (arg.StartsWith("/root:", StringComparison.Ordinal))
                 {
                     rootPath = Path.GetFullPath(arg.Substring("/root:".Length).StripQuotes());
                     continue;
                 }
-
-                if (arg.StartsWith("/rebase:", StringComparison.Ordinal))
+                
+                if (arg.StartsWith("/replacementroot:", StringComparison.Ordinal))
                 {
-                    binlogRebasePath = Path.GetFullPath(arg.Substring("/rebase:".Length).StripQuotes());
+                    binlogReplacementRootPath = Path.GetFullPath(arg.Substring("/replacementroot:".Length).StripQuotes());
                     continue;
                 }
 
@@ -300,12 +281,12 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 excludeTests,
                 rootPath,
                 includeSourceGeneratedDocuments,
-                allowDuplicateAssemblies,
-                binlogRebasePath);
+                binlogReplacementRootPath);
         }
 
         private static void AddProject(List<string> projects, string path)
         {
+            Log.Message("Adding project: " + path);
             var project = Path.GetFullPath(path);
             if (IsSupportedProject(project))
             {

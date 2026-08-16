@@ -2,8 +2,11 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Logging.StructuredLogger;
 using Microsoft.CodeAnalysis;
+using Microsoft.SourceBrowser.Common;
 using CompilerInvocation = Microsoft.SourceBrowser.HtmlGenerator.GenerateFromBuildLog.CompilerInvocation;
 
 namespace Microsoft.SourceBrowser.HtmlGenerator
@@ -16,15 +19,24 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
     public class BinLogCompilerInvocationsReader
     {
-        /// <summary>
-        /// Binlog reader does not handle concurrent accesses appropriately so handle it here
-        /// </summary>
-        private static readonly ConcurrentDictionary<string, Lazy<List<CompilerInvocation>>> m_binlogInvocationMap
-            = new ConcurrentDictionary<string, Lazy<List<CompilerInvocation>>>(StringComparer.OrdinalIgnoreCase);
+        /// Binlog reader does not handle concurrent accesses appropriately so handle it here.
+        /// The cached result stores both compiler invocations and metadata so the file is read once
+        private static readonly ConcurrentDictionary<string, Lazy<BinLogExtractionResult>> mBinlogDataMap = new ConcurrentDictionary<string, Lazy<BinLogExtractionResult>>(StringComparer.OrdinalIgnoreCase);
+        private const string TeamcityBuildCheckoutDir = "teamcity_build_checkoutDir";
 
-        public static IEnumerable<CompilerInvocation> ExtractInvocations(string binLogFilePath)
+        public sealed class BinLogExtractionResult
         {
-            // Normalize the path
+            public BinLogExtractionResult(IReadOnlyList<CompilerInvocation> invocations, string checkoutDirectory)
+            {
+                Invocations = invocations ?? Array.Empty<CompilerInvocation>();
+                CheckoutDirectory = checkoutDirectory;
+            }
+            public IReadOnlyList<CompilerInvocation> Invocations { get; }
+            public string CheckoutDirectory { get; }
+        }
+
+        public static BinLogExtractionResult ExtractBinLogData(string binLogFilePath)
+        {
             binLogFilePath = Path.GetFullPath(binLogFilePath);
 
             if (!File.Exists(binLogFilePath))
@@ -32,98 +44,34 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 throw new FileNotFoundException(binLogFilePath);
             }
 
-            var lazyResult = m_binlogInvocationMap.GetOrAdd(binLogFilePath, new Lazy<List<CompilerInvocation>>(() =>
-            {
-                if (binLogFilePath.EndsWith(".buildlog", StringComparison.OrdinalIgnoreCase))
-                {
-                    return ExtractInvocationsFromBuild(binLogFilePath);
-                }
-
-                var invocations = new List<CompilerInvocation>();
-                var reader = new Microsoft.Build.Logging.StructuredLogger.BinLogReader();
-                var taskIdToInvocationMap = new Dictionary<(int, int), CompilerInvocation>();
-
-                void TryGetInvocationFromEvent(object sender, BuildEventArgs args)
-                {
-                    var invocation = TryGetInvocationFromRecord(args, taskIdToInvocationMap);
-                    if (invocation != null)
-                    {
-                        invocation.SolutionRoot = Path.GetDirectoryName(binLogFilePath);
-                        invocations.Add(invocation);
-                    }
-                }
-
-                reader.TargetStarted += TryGetInvocationFromEvent;
-                reader.MessageRaised += TryGetInvocationFromEvent;
-
-                reader.Replay(binLogFilePath);
-
-                return invocations;
-            }));
-
-            var result = lazyResult.Value;
-
-            return result;
+            var lazyResult = mBinlogDataMap.GetOrAdd(binLogFilePath, new Lazy<BinLogExtractionResult>(() => ExtractFromBuild(binLogFilePath)));
+            return lazyResult.Value;
         }
 
-        private static List<CompilerInvocation> ExtractInvocationsFromBuild(string logFilePath)
+        public static IEnumerable<CompilerInvocation> ExtractInvocations(string binLogFilePath)
+        {
+            return ExtractBinLogData(binLogFilePath).Invocations;
+        }
+
+        private static BinLogExtractionResult ExtractFromBuild(string logFilePath)
         {
             var build = Microsoft.Build.Logging.StructuredLogger.Serialization.Read(logFilePath);
+            var solutionRoot = Path.GetDirectoryName(logFilePath);
             var invocations = new List<CompilerInvocation>();
             build.VisitAllChildren<Microsoft.Build.Logging.StructuredLogger.Task>(t =>
             {
                 var invocation = TryGetInvocationFromTask(t);
                 if (invocation != null)
                 {
+                    invocation.SolutionRoot = solutionRoot;
                     invocations.Add(invocation);
                 }
             });
-
-            return invocations;
-        }
-
-        private static CompilerInvocation TryGetInvocationFromRecord(BuildEventArgs args, Dictionary<(int, int), CompilerInvocation> taskIdToInvocationMap)
-        {
-            int targetId = args.BuildEventContext?.TargetId ?? -1;
-            int projectId = args.BuildEventContext?.ProjectInstanceId ?? -1;
-            if (targetId < 0)
-            {
-                return null;
-            }
-
-            var targetStarted = args as TargetStartedEventArgs;
-            if (targetStarted != null && targetStarted.TargetName == "CoreCompile")
-            {
-                var invocation = new CompilerInvocation();
-                taskIdToInvocationMap[(targetId, projectId)] = invocation;
-                invocation.ProjectFilePath = targetStarted.ProjectFile;
-                return null;
-            }
-
-            var commandLine = GetCommandLineFromEventArgs(args, out var language);
-            if (commandLine == null)
-            {
-                return null;
-            }
-
-            CompilerInvocation compilerInvocation;
-            if (taskIdToInvocationMap.TryGetValue((targetId, projectId), out compilerInvocation))
-            {
-                compilerInvocation.Language = language == CompilerKind.CSharp ? LanguageNames.CSharp : LanguageNames.VisualBasic;
-                compilerInvocation.CommandLineArguments = commandLine;
-                Populate(compilerInvocation);
-                taskIdToInvocationMap.Remove((targetId, projectId));
-            }
-
-            return compilerInvocation;
-        }
-
-        private static void Populate(CompilerInvocation compilerInvocation)
-        {
-            if (compilerInvocation.Language == LanguageNames.CSharp)
-            {
-                compilerInvocation.OutputAssemblyPath = compilerInvocation.Parsed.GetOutputFilePath(compilerInvocation.Parsed.OutputFileName);
-            }
+            var checkoutDir = build
+                .FindChildrenRecursive<Property>()
+                .FirstOrDefault(p => string.Equals(p.Name, TeamcityBuildCheckoutDir, StringComparison.OrdinalIgnoreCase))?.Value;
+            Log.Message($"Old checkout directory in binlog is : {checkoutDir}");
+            return new BinLogExtractionResult(invocations, checkoutDir);
         }
 
         private static CompilerInvocation TryGetInvocationFromTask(Microsoft.Build.Logging.StructuredLogger.Task task)
@@ -139,29 +87,64 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             commandLine = TrimCompilerExeFromCommandLine(commandLine, name == "Csc"
                 ? CompilerKind.CSharp
                 : CompilerKind.VisualBasic);
-            return new CompilerInvocation
+            var invocation = new CompilerInvocation
             {
                 Language = language,
                 CommandLineArguments = commandLine,
                 ProjectFilePath = task.GetNearestParent<Microsoft.Build.Logging.StructuredLogger.Project>()?.ProjectFile
             };
+
+            // Mirror the streaming reader so both paths resolve the output assembly path.
+            var parsed = invocation.Parsed;
+            if (invocation.Language == LanguageNames.CSharp && parsed != null)
+            {
+                invocation.OutputAssemblyPath = parsed.GetOutputFilePath(parsed.OutputFileName);
+            }
+            return invocation;
         }
 
         public static string TrimCompilerExeFromCommandLine(string commandLine, CompilerKind language)
         {
-            int occurrence = -1;
-            if (language == CompilerKind.CSharp)
+            if (string.IsNullOrEmpty(commandLine))
             {
-                occurrence = commandLine.IndexOf("csc.exe ", StringComparison.OrdinalIgnoreCase);
-            }
-            else if (language == CompilerKind.VisualBasic)
-            {
-                occurrence = commandLine.IndexOf("vbc.exe ", StringComparison.OrdinalIgnoreCase);
+                return commandLine;
             }
 
-            if (occurrence > -1)
+            // The compiler token appears in different forms depending on the OS/build host:
+            //   Windows:      C:\...\bin\Roslyn\csc.exe /noconfig ...
+            //   Windows (SDK): "C:\...\csc.dll" /noconfig ...
+            //   Linux/macOS:  /usr/.../dotnet exec "/usr/.../Roslyn/bincore/csc.dll" /noconfig ...
+            // In the .dll forms the path is usually wrapped in quotes, so the character right
+            // after "csc.dll"/"vbc.dll" is a double quote rather than a space. Searching for the
+            // token followed by a literal space (as was done previously) fails on these binlogs
+            // and leaves the "dotnet exec ...csc.dll" prefix in the command line, which then gets
+            // misinterpreted as extra source files by the command line parser.
+            var compiler = language == CompilerKind.CSharp ? "csc" : "vbc";
+
+            foreach (var extension in new[] { ".exe", ".dll" })
             {
-                commandLine = commandLine.Substring(occurrence + "csc.exe ".Length);
+                var token = compiler + extension;
+                int occurrence = commandLine.IndexOf(token, StringComparison.OrdinalIgnoreCase);
+                if (occurrence < 0)
+                {
+                    continue;
+                }
+
+                int cut = occurrence + token.Length;
+
+                // Skip a closing quote wrapping the compiler path (e.g. "...csc.dll").
+                if (cut < commandLine.Length && commandLine[cut] == '"')
+                {
+                    cut++;
+                }
+
+                // Skip any whitespace separating the compiler path from the first argument.
+                while (cut < commandLine.Length && char.IsWhiteSpace(commandLine[cut]))
+                {
+                    cut++;
+                }
+
+                return commandLine.Substring(cut);
             }
 
             return commandLine;
@@ -186,6 +169,21 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             var commandLine = task.CommandLine;
             commandLine = TrimCompilerExeFromCommandLine(commandLine, language);
             return commandLine;
+        }
+
+
+        /// Extracts the original checkout directory from binlog metadata.
+        public static string ExtractCheckoutDirectory(string binLogFilePath)
+        {
+            try
+            {
+                return ExtractBinLogData(binLogFilePath).CheckoutDirectory;
+            }
+            catch (Exception ex)
+            {
+                Log.Exception(ex, $"Failed to extract checkout directory from binlog: {binLogFilePath}", isSevere: false);
+                return null;
+            }
         }
     }
 }

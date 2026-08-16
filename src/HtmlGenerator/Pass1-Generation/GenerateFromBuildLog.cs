@@ -25,15 +25,6 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             Folder<ProjectSkeleton> solutionExplorerRoot = null,
             bool includeSourceGeneratedDocuments = true)
         {
-            // Diagnostic entry log so a project silently lost between binlog extraction and the
-            // deduplicator can be pinpointed by comparing this stream to the "Binlog produced N
-            // invocations" summary emitted by Program.cs.
-            Log.Message(string.Format(
-                "GenerateInvocationAsync: assembly='{0}' project='{1}' language='{2}'",
-                invocation.AssemblyName ?? "<none>",
-                invocation.ProjectFilePath ?? "-",
-                invocation.Language ?? "<none>"));
-
             try
             {
                 if (invocation.Language == "TypeScript")
@@ -63,11 +54,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                         invocation.OutputAssemblyPath,
                         Paths.SolutionDestinationFolder,
                         cancellationToken);
-                    // Metadata-as-source path: pass the shared processedAssemblyList so a duplicate
-                    // assembly here is detected by the same deduplicator used everywhere else.
-                    // Without this it was silently overwriting whichever project won the folder
-                    // name race.
-                    await solutionGenerator.GenerateAsync(cancellationToken, processedAssemblyList, solutionExplorerRoot);
+                    await solutionGenerator.GenerateAsync(cancellationToken);
                 }
             }
             catch (Exception ex)
