@@ -348,6 +348,10 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 }
             }
 
+            // Temporary: only index Highway assemblies to speed up test runs.
+            assemblyNames.RemoveWhere(n => !n.StartsWith("Highway", StringComparison.OrdinalIgnoreCase));
+            Log.Message($"Assembly filter active (hardcoded: Highway): {assemblyNames.Count} assemblies kept.");
+
             var processedAssemblyList = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (var path in solutionFilePaths)
@@ -376,6 +380,12 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                         {
                             invocations = ReplaceRootInInvocations(invocations, binlogData.CheckoutDirectory, binlogReplacementRootPath);
                         }
+
+                        // Temporary: mirror the assemblyNames filter so we don't process non-Highway projects.
+                        invocations = invocations
+                            .Where(inv => (inv.AssemblyName ?? "").StartsWith("Highway", StringComparison.OrdinalIgnoreCase))
+                            .ToArray();
+                        Log.Message($"Assembly filter: kept {invocations.Length} invocation(s) matching 'Highway'.");
                         // Build a map of assembly names to their physical DLL paths from all references found in the binlog.
                         // this helps 
                         int assemblyMapEntriesBefore = GenerateFromBuildLog.AssemblyNameToFilePathMap.Count;
