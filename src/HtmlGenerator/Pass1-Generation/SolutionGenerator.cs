@@ -436,7 +436,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
         }
 
         // Returns the local path Roslyn should use for a recorded reference path: the path itself
-        // if it exists, otherwise the same assembly's supplied bin/ DLL, or null if neither is
+        // if it exists, otherwise the same assembly's supplied bin/ DLL, otherwise the same NuGet
+        // package resolved from this machine's own package cache, or null if none of those are
         // available (in which case the reference is dropped).
         private static string ResolveReferencePath(string path, string projectSourceFolder)
         {
@@ -465,7 +466,65 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 return localPath;
             }
 
+            var nugetPath = TryResolveFromLocalNuGetCache(path);
+            if (nugetPath != null)
+            {
+                return nugetPath;
+            }
+
             return null;
+        }
+
+        // A binlog records NuGet package references under the machine/user that actually ran the
+        // build (e.g. a CI service account's "C:\Users\<agent>\.nuget\packages\..."). NuGet's global
+        // packages folder is per-user, so on any other machine - including a developer's own laptop -
+        // that exact path never exists, and EVERY package reference (including framework reference
+        // packages like Microsoft.NETFramework.ReferenceAssemblies, which ships mscorlib.dll/System.dll)
+        // gets silently dropped by RemoveNonExistentReferencesFromCommandLine. Losing mscorlib alone is
+        // enough to make basic types resolve as error types throughout the whole compilation, which is
+        // why references can vanish for essentially any symbol, not just cross-assembly ones. This
+        // re-roots a dropped "<...>\.nuget\packages\<package>\<version>\...\<file>" path onto the
+        // *current* machine's own NuGet global packages folder (NUGET_PACKAGES env var, else the
+        // standard "<user profile>/.nuget/packages" default) and keeps everything from "packages"
+        // onward, so a locally-restored copy of the same package/version is used instead.
+        private static readonly Lazy<string> localNuGetPackagesRoot = new Lazy<string>(() =>
+        {
+            var fromEnv = Environment.GetEnvironmentVariable("NUGET_PACKAGES");
+            if (!string.IsNullOrEmpty(fromEnv))
+            {
+                return fromEnv.TrimEnd('\\', '/');
+            }
+
+            var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            return string.IsNullOrEmpty(userProfile) ? null : Path.Combine(userProfile, ".nuget", "packages");
+        });
+
+        private static string TryResolveFromLocalNuGetCache(string path)
+        {
+            if (localNuGetPackagesRoot.Value == null)
+            {
+                return null;
+            }
+
+            var segments = path.Split('\\', '/');
+            var packagesIndex = Array.FindIndex(segments, s => string.Equals(s, "packages", StringComparison.OrdinalIgnoreCase));
+            if (packagesIndex < 0 || packagesIndex == segments.Length - 1)
+            {
+                // Not a ".../packages/..." style NuGet cache path (or nothing follows "packages"),
+                // e.g. an SDK-shipped analyzer or MSBuild-Extensions path: no local package to fall back to.
+                return null;
+            }
+
+            // Only treat this as a NuGet cache path if "packages" is itself under a ".nuget" folder,
+            // to avoid accidentally matching an unrelated directory that happens to be named "packages".
+            if (packagesIndex == 0 || !string.Equals(segments[packagesIndex - 1], ".nuget", StringComparison.OrdinalIgnoreCase))
+            {
+                return null;
+            }
+
+            var relativeSuffix = string.Join(Path.DirectorySeparatorChar.ToString(), segments.Skip(packagesIndex + 1));
+            var candidate = Path.Combine(localNuGetPackagesRoot.Value, relativeSuffix);
+            return File.Exists(candidate) ? candidate : null;
         }
 
         private static bool ReferenceFileExists(string path, string projectSourceFolder)
