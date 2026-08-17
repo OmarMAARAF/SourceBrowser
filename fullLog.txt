@@ -1,0 +1,650 @@
+C:/HOMEWARE/ARD/repos/SourceBrowser/src/HtmlGenerator/bin/Debug/net48/HtmlGenerator.exe C:\Users\M045143\Downloads\Compile_Win32Release_26.0.0_4911.binlog /replacementroot:C:\HOMEWARE\ARD\repos\ying /out:C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index /force
+10:56:49 Registered MSBuild is: 18.6.11822.322 from 'C:\Program Files\Microsoft Visual Studio\18\Professional\MSBuild\Current\Bin'
+10:56:49 Deleting C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index
+10:56:49 Generating website
+10:56:54 Reading assembly names from C:\Users\M045143\Downloads\Compile_Win32Release_26.0.0_4911.binlog
+10:57:29 Old checkout directory in binlog is : 
+10:57:29 Reading assembly names from C:\Users\M045143\Downloads\Compile_Win32Release_26.0.0_4911.binlog complete. Took: 00:00:35.8987229
+10:57:29 Assembly filter active (hardcoded: Highway): 4 assemblies kept.
+10:57:29 Generating C:\Users\M045143\Downloads\Compile_Win32Release_26.0.0_4911.binlog
+10:57:29 Computed common root from project paths: 'D:\TeamCity\SRVCLDGUSD039\work\ContinuousCompilation'
+10:57:29 Replacing root paths from 'D:\TeamCity\SRVCLDGUSD039\work\ContinuousCompilation' to 'C:\HOMEWARE\ARD\repos\ying'
+10:57:30 Assembly filter: kept 4 invocation(s) matching 'Highway'.
+10:57:30 LocalReferenceAssemblyMap has 4 entr(ies); AssemblyNameToFilePathMap grew by 4 after registering outputs for 'C:\Users\M045143\Downloads\Compile_Win32Release_26.0.0_4911.binlog'.
+10:57:30 C:\HOMEWARE\ARD\repos\ying\Applicative\Highway\GateWay\Common\Prod\Highway.Gateway.Common.csproj
+10:57:31 Document doesn't exist on disk: C:\HOMEWARE\ARD\repos\ying\.ard\obj\Highway.Gateway.Common\Win32\Release\net471\.NETFramework,Version=v4.7.1.AssemblyAttributes.cs
+10:57:31 Document doesn't exist on disk: C:\HOMEWARE\ARD\repos\ying\.ard\obj\Highway.Gateway.Common\Win32\Release\net471\Highway.Gateway.Common.AssemblyInfo.cs
+10:57:31 Ard.Highway.Gateway.Common references an assembly that cannot be resolved: mscorlib
+10:57:31 Ard.Highway.Gateway.Common references an assembly that cannot be resolved: Ard.Highway.GateWayApi
+10:57:31 Ard.Highway.Gateway.Common references an assembly that cannot be resolved: Microsoft.Extensions.Caching.Abstractions
+10:57:31 Ard.Highway.Gateway.Common references an assembly that cannot be resolved: log4net
+10:57:31 Ard.Highway.Gateway.Common references an assembly that cannot be resolved: Sgcib.Mark.Ard.Highway.DatabaseApi
+10:57:31 Ard.Highway.Gateway.Common references an assembly that cannot be resolved: Sgcib.Mark.Ard.Magneto.Config.ConfTypes
+10:57:31 Ard.Highway.Gateway.Common references an assembly that cannot be resolved: Ard.SonicApi
+10:57:31 Ard.Highway.Gateway.Common references an assembly that cannot be resolved: Sgcib.Mark.Ard.Magneto.Store
+10:57:31 Ard.Highway.Gateway.Common references an assembly that cannot be resolved: Ard.PerfLogging
+10:57:31 Ard.Highway.Gateway.Common references an assembly that cannot be resolved: System
+10:57:31 Ard.Highway.Gateway.Common references an assembly that cannot be resolved: Sgcib.Mark.Ard.MagnetoApi
+10:57:31 Ard.Highway.Gateway.Common references an assembly that cannot be resolved: Ard.AzureAccessApi
+10:57:31 Ard.Highway.Gateway.Common references an assembly that cannot be resolved: Ard.Highway.Gateway.PrivateApi
+10:57:31 Ard.Highway.Gateway.Common references an assembly that cannot be resolved: System.Collections.Immutable
+10:57:31 Ard.Highway.Gateway.Common references an assembly that cannot be resolved: Ard.Basics.Common.SimpleTypes
+10:57:31 Ard.Highway.Gateway.Common references an assembly that cannot be resolved: Sgcib.Mark.Ard.Highway.PrivateApi
+10:57:31 Ard.Highway.Gateway.Common references an assembly that cannot be resolved: Ard.Highway.Store.BaseApi
+10:57:31 Ard.Highway.Gateway.Common references an assembly that cannot be resolved: System.Net.Http
+10:57:31 Ard.Highway.Gateway.Common references an assembly that cannot be resolved: JetBrains.Annotations
+10:57:31 Ard.Highway.Gateway.Common references an assembly that cannot be resolved: SocGen.ApiBank.Security.Model
+10:57:31 Ard.Highway.Gateway.Common references an assembly that cannot be resolved: SocGen.ApiBank.Security.Client.Http
+10:57:31 Ard.Highway.Gateway.Common references an assembly that cannot be resolved: Ard.HighwayReplay.Gateway
+10:57:31 Ard.Highway.Gateway.Common references an assembly that cannot be resolved: Ard.Highway.ProductStoreApi
+10:57:31 Ard.Highway.Gateway.Common references an assembly that cannot be resolved: Ard.Sonic.Utilities
+10:57:31 Ard.Highway.Gateway.Common references an assembly that cannot be resolved: Ard.Sonic.Runner
+10:57:31 Ard.Highway.Gateway.Common references an assembly that cannot be resolved: Ard.Sonic.PrivateInterfaces
+10:57:31 Ard.Highway.Gateway.Common references an assembly that cannot be resolved: Ard.HighwayBaseApi
+10:57:31 Ard.Highway.Gateway.Common references an assembly that cannot be resolved: System.Core
+10:57:31 Ard.Highway.Gateway.Common references an assembly that cannot be resolved: Socgen.Defi.Tau.RD.BasicComponents
+10:57:31 Ard.Highway.Gateway.Common references an assembly that cannot be resolved: Sgcib.Mark.Ard.Magneto.Config
+10:57:31 Ard.Highway.Gateway.Common references an assembly that cannot be resolved: Ard.AsyncUtilities
+10:57:31 Ard.Highway.Gateway.Common references an assembly that cannot be resolved: Newtonsoft.Json
+10:57:31 Ard.Highway.Gateway.Common references an assembly that cannot be resolved: System.Runtime.Serialization
+10:57:31 Ard.Highway.Gateway.Common references an assembly that cannot be resolved: Microsoft.Extensions.Caching.Memory
+10:57:31 Ard.Highway.Gateway.Common references an assembly that cannot be resolved: Microsoft.Extensions.Options
+10:57:31 Ard.Highway.Gateway.Common references an assembly that cannot be resolved: Ard.Dotnet.Extensions
+10:57:31 Ard.Highway.Gateway.Common references an assembly that cannot be resolved: TestableIO.System.IO.Abstractions.Wrappers
+10:57:31 Ard.Highway.Gateway.Common references an assembly that cannot be resolved: TestableIO.System.IO.Abstractions
+10:57:31 Ard.Highway.Gateway.Common references an assembly that cannot be resolved: Sgcib.Mark.Ard.Highway.Database
+10:57:31 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common
+10:57:32 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Command\Exceptions\InvalidRequestActivityStateException.cs.html
+10:57:32 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Config\ElasticsearchConfig.cs.html
+10:57:32 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Config\DataSources.cs.html
+10:57:32 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\ChangeTemplate\ChangeTemplateRepository.cs.html
+10:57:32 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Config\DatacenterRuntimeConfigSchema.cs.html
+10:57:32 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\ChangeTemplate\ChangeTemplateApplier.cs.html
+10:57:32 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\BackgroundTasks\PeriodicBackgroundServiceBase.cs.html
+10:57:32 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\AssemblyInfo.cs.html
+10:57:32 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\ConfiguredMemoryCache.cs.html
+10:57:32 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\BackgroundTasks\BackgroundServiceManager.cs.html
+10:57:32 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\BackgroundTasks\BackgroundServiceBase.cs.html
+10:57:32 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Command\RequestActivityManager.cs.html
+10:57:32 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Command\ChainMonitoringPublisher.cs.html
+10:57:32 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\ChangeTemplate\TemplateStore.cs.html
+10:57:32 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\ChangeTemplate\IChangeTemplatesRepository.cs.html
+10:57:32 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Command\GateWayActions.cs.html
+10:57:32 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\BackgroundTasks\Metadata.cs.html
+10:57:32 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Command\RuntimeInfoBuilder.cs.html
+10:57:32 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\BackgroundTasks\WorkItemWithMetadata.cs.html
+10:57:32 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\ChangeTemplate\ChangeTemplateJsonSerializerSettings.cs.html
+10:57:32 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Command\GateWayActionsHelper.cs.html
+10:57:32 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\ChangeTemplate\IProcessor.cs.html
+10:57:32 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\BackgroundTasks\LongRunningJobKiller.cs.html
+10:57:32 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Config\BackgroundProcessingConfig.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Config\GatewayClientConfig.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Config\GatewayClientConfigs.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Config\GatewayConfig.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Config\LongRunningJobKillerConfig.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Config\SecurityPolicy.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Executor\RegistrationModule.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Extensions\DataCenterRuntimeConfigExtensions.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\GatewayClientTransport\GateWayClientTransport.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Config\ServiceConfiguration.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\GatewayClientTransport\GateWayClientTransportConfig.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\GatewayConfigsHelper.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\HoconConfig\IHoconDownloader.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\HoconConfig\IHoconDownloaderConfig.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\HoconConfig\IHoconUploader.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\HoconConfig\NetworkHoconDownloaderConfig.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\HoconConfig\NotAllowedHoconDownloader.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\HoconConfig\NetworkHoconDownloader.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\HoconConfig\IHoconUploaderConfig.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\HoconConfig\NotAllowedHoconUploader.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Kpi\KpiWriter.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Monitoring\ContextIdWatcher.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Monitoring\ExportDataWatcher.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Monitoring\ExportJob.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Monitoring\GhostKillerWatcher.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Monitoring\GridJobStatusWatcher.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Monitoring\HighwayStatusInfo.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Monitoring\HighwayStatusWatcher.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Monitoring\JobMonitor.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Monitoring\PricingJob.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Monitoring\WatcherHelper.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Monitoring\SonicStatusInfo.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Replay\GateWayReplayExecutorServices.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\ScopeMonitor.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Monitoring\SonicStatusWatcher.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Security\EndUserInfo.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Kpi\IKpiWriter.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Security\IGatewayAuthTokenProvider.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Security\IGatewayUserAuthorizer.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Monitoring\WatcherStats.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Security\RequiredPermission.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Security\SesameId.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Security\GatewayUser.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Security\SgConnectTokenConfig.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Security\TokenInfo.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Security\SgConnectScope.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Security\SGConnectTokenProvider.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Security\UserPermissions.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Security\WindowsLogin.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Services\BackgroundTaskProcessor.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Services\ActiveDataCenterRuntimeConfig.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Services\DataCenterRuntimeConfigReader.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Services\DataCenterRuntimeConfigWriter.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Services\IAzureRegionToggler.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Services\IDataCenterRuntimeConfigReader.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Services\DatacenterRuntimeConfigService.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Services\IDatacenterRuntimeConfigService.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Services\IHoconConfigurationProvider.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Services\IDataCenterRuntimeConfigWriter.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Services\IJobKiller.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Services\JobKiller.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Services\IHoconConfigurationService.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Services\ITaskProcessor.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Services\NullDatacenterRuntimeConfigWriter.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Services\PeriodicThreadPoolHealthPublisher.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Services\SimpleTaskProcessor.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Services\DatacenterRuntimeConfigAzureRegionToggler.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Services\LegacyDataCenterRuntimeConfigReader.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Security\PrincipalExtensions.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Services\SimpleConfigurationProvider.cs.html
+10:57:33 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.Gateway.Common\Monitoring\JobData.cs.html
+10:57:34 Exception during Project file generation: C:\HOMEWARE\ARD\repos\ying\Applicative\Highway\GateWay\Common\Prod\Highway.Gateway.Common.csproj
+System.MissingMethodException: Méthode introuvable : 'Boolean Microsoft.NET.StringTools.SpanBasedStringBuilder.Equals(System.ReadOnlySpan`1<Char>)'.
+   à Microsoft.Build.Evaluation.Expander`2.MetadataExpander.ExpandMetadataLeaveEscaped(String expression, IMetadataTable metadata, ExpanderOptions options, IElementLocation elementLocation, LoggingContext loggingContext)
+   à Microsoft.Build.Evaluation.Expander`2.ExpandIntoStringLeaveEscaped(String expression, ExpanderOptions options, IElementLocation elementLocation)
+   à Microsoft.Build.Evaluation.ToolsetReader.ExpandPropertyUnescaped(ToolsetPropertyDefinition property, Expander`2 expander)
+   à Microsoft.Build.Evaluation.ToolsetReader.EvaluateAndSetProperty(ToolsetPropertyDefinition property, PropertyDictionary`1 properties, PropertyDictionary`1 globalProperties, PropertyDictionary`1 initialProperties, Boolean accumulateProperties, String& toolsPath, String& binPath, Expander`2& expander)
+   à Microsoft.Build.Evaluation.ToolsetReader.ReadToolset(ToolsetPropertyDefinition toolsVersion, PropertyDictionary`1 globalProperties, PropertyDictionary`1 initialProperties, Boolean accumulateProperties)
+   à Microsoft.Build.Evaluation.ToolsetReader.ReadEachToolset(Dictionary`2 toolsets, PropertyDictionary`1 globalProperties, PropertyDictionary`1 initialProperties, Boolean accumulateProperties)
+   à Microsoft.Build.Evaluation.ToolsetReader.ReadToolsets(Dictionary`2 toolsets, PropertyDictionary`1 globalProperties, PropertyDictionary`1 initialProperties, Boolean accumulateProperties, String& msBuildOverrideTasksPath, String& defaultOverrideToolsVersion)
+   à Microsoft.Build.Evaluation.ToolsetReader.<ReadAllToolsets>g__ReadConfigToolset|11_0(<>c__DisplayClass11_0& )
+   à Microsoft.Build.Evaluation.ToolsetReader.ReadAllToolsets(Dictionary`2 toolsets, ToolsetRegistryReader registryReader, ToolsetConfigurationReader configurationReader, PropertyDictionary`1 environmentProperties, PropertyDictionary`1 globalProperties, ToolsetDefinitionLocations locations)
+   à Microsoft.Build.Evaluation.ProjectCollection.InitializeToolsetCollection(ToolsetRegistryReader registryReader, ToolsetConfigurationReader configReader)
+   à Microsoft.Build.Evaluation.ProjectCollection..ctor(IDictionary`2 globalProperties, IEnumerable`1 loggers, IEnumerable`1 remoteLoggers, ToolsetDefinitionLocations toolsetDefinitionLocations, Int32 maxNodeCount, Boolean onlyLogCriticalEvents, Boolean loadProjectsReadOnly, Boolean useAsynchronousLogging, Boolean reuseProjectRootElementCache, Boolean enableTargetOutputLogging)
+   à Microsoft.Build.Evaluation.ProjectCollection..ctor()
+   à Microsoft.SourceBrowser.HtmlGenerator.ProjectGenerator.GenerateProjectFile() dans C:\HOMEWARE\ARD\repos\SourceBrowser\src\HtmlGenerator\Pass1-Generation\ProjectGenerator.ProjectFile.cs:ligne 35
+10:57:34 Declarations...
+10:57:34 Base members...
+10:57:34 Implemented interface members...
+10:57:34 Project info...
+10:57:34 References data files...
+10:57:34 Symbol ID to list of locations map...
+10:57:34 Referenced assembly list...
+10:57:35 Project Explorer...
+10:57:35 Namespace Explorer...
+10:57:35 index.html...
+10:57:37 C:\HOMEWARE\ARD\repos\ying\Applicative\Highway\GateWay\Prod\Fwk\Highway.GateWay.Fwk.csproj
+10:57:37 Document doesn't exist on disk: C:\HOMEWARE\ARD\repos\ying\.ard\obj\Highway.GateWay.Fwk\Win32\Release\net471\.NETFramework,Version=v4.7.1.AssemblyAttributes.cs
+10:57:37 Document doesn't exist on disk: C:\HOMEWARE\ARD\repos\ying\.ard\obj\Highway.GateWay.Fwk\Win32\Release\net471\Highway.GateWay.Fwk.AssemblyInfo.cs
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: mscorlib
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: Ard.HighwayBaseApi
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: log4net
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: System.Collections.Immutable
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: Ard.Highway.GateWayApi
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: Ard.Basics.Common.SimpleTypes
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: Ard.Highway.Gateway.PrivateApi
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: System
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: JetBrains.Annotations
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: System.Web.Http
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: Sgcib.Mark.Ard.MagnetoApi
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: Sgcib.Mark.Ard.Highway.DatabaseApi
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: System.Net.Http
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: Microsoft.Extensions.Caching.Abstractions
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: Sgcib.Mark.Ard.Magneto.Config.ConfTypes
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: Sgcib.Mark.Ard.Magneto.Store
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: Ard.SonicApi
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: Sgcib.Mark.Ard.Highway.PrivateApi
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: Ard.AzureAccessApi
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: Ard.Sonic.PrivateInterfaces
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: Ard.Sonic.Utilities
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: Sgcib.Mark.Ard.Magneto.Config
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: Microsoft.Owin.Hosting
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: Owin
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: Microsoft.AspNet.WebApi.Versioning
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: SimpleInjector
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: Microsoft.Owin
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: SocGen.ApiBank.Security.Model
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: SocGen.ApiBank.Security.Client.Http
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: Microsoft.AspNetCore.Authorization
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: Microsoft.Extensions.Options
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: SocGen.ApiBank.Security.Authentication.Owin
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: Newtonsoft.Json
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: Swashbuckle.Core
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: SocGen.ApiBank.Swashbuckle.Owin
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: SocGen.ApiBank.zipkin4net
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: SocGen.ApiBank.Zipkin.Owin
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: ICSharpCode.SharpZipLib
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: Socgen.Defi.Tau.RD.BasicComponents
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: Arkheion
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: System.Runtime.Serialization
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: System.ServiceProcess
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: Microsoft.Owin.Host.HttpListener
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: Sgcib.Mark.Ard.Highway.Database
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: Sgcib.Mark.Ard.Highway.Store.AzureBase
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: System.Core
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: Ard.Sonic.Runner
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: SimpleInjector.Integration.WebApi
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: System.Web.Http.Owin
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: SocGen.ApiBank.Security.Authorization.Owin
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: System.Net.Http.Formatting
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: SocGen.ApiBank.Security.Authorization
+10:57:38 Ard.Highway.GateWay.Fwk references an assembly that cannot be resolved: SocGen.ApiBank.Common
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\MetricsPublisherFactory.cs.html
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\RuntimeReferences.cs.html
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\Service\ServiceState.cs.html
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\Service\ServiceNotifier.cs.html
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\Service\BaseArdService.cs.html
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\Service\ArdLauncher\IArdLauncher.cs.html
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\Service\ArdLauncher\ILauncherKiller.cs.html
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\Web\ActionResults\FileStreamResult.cs.html
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\TaskLimiter.cs.html
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\RefreshBasedHoconConfigurationProvider.cs.html
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\AssemblyInfo.cs.html
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\Service\ArdLauncher\WindowsServiceLauncher.cs.html
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\Service\ArdLauncher\ConsoleLauncher.cs.html
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\Web\Controller\BaseController.cs.html
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\Web\Controller\ConfigurationController.cs.html
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\Service\StatusNotifier.cs.html
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\Service\ArdLauncher\ArdLauncherFactory.cs.html
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\Web\Controller\BackEndsController.cs.html
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\Web\Controller\AboutController.cs.html
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\Web\Controller\AzureRegionController.cs.html
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\Web\Controller\CompressedRequestHandler.cs.html
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\Web\Controller\BusinessProcessesController.cs.html
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\Web\ActionResults\FileResult.cs.html
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\Service\WindowsService.cs.html
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\Web\Controller\CustomUnauthorizedResponseHandler.cs.html
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\Web\Controller\DataCentersController.cs.html
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\Web\Controller\Extensions\HttpControllerContextExtensions.cs.html
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\Web\Controller\JobController.cs.html
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\Web\Controller\ModesController.cs.html
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\Web\Controller\MonitoringController.cs.html
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\Web\Controller\ReplayController.cs.html
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\Web\Controller\RequestController.cs.html
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\Web\Controller\RouteMapper.cs.html
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\Web\Controller\TroubleshootingController.cs.html
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\Web\Exceptions\ClientDisconnectedException.cs.html
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\Web\Exceptions\ProbingException.cs.html
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\Web\Filters\ActionExecutionInjectorAttribute.cs.html
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\Web\Filters\MethodNameInjectorAttribute.cs.html
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\Web\Filters\ApiVersionInjector.cs.html
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\Web\GatewayCompositionRoot.cs.html
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\Web\GateWayService.cs.html
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\Web\Middlewares\AccessKpisWriter.cs.html
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\Web\Middlewares\GlobalExceptionsHandler.cs.html
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\Web\Middlewares\RequestUuidInjector.cs.html
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\Web\Startup.cs.html
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\Web\Middlewares\ClientDisconnectHandler.cs.html
+10:57:38 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.Fwk\Web\MetricsPublisher.cs.html
+10:57:38 Exception during Project file generation: C:\HOMEWARE\ARD\repos\ying\Applicative\Highway\GateWay\Prod\Fwk\Highway.GateWay.Fwk.csproj
+System.MissingMethodException: Méthode introuvable : 'Boolean Microsoft.NET.StringTools.SpanBasedStringBuilder.Equals(System.ReadOnlySpan`1<Char>)'.
+   à Microsoft.Build.Evaluation.Expander`2.MetadataExpander.ExpandMetadataLeaveEscaped(String expression, IMetadataTable metadata, ExpanderOptions options, IElementLocation elementLocation, LoggingContext loggingContext)
+   à Microsoft.Build.Evaluation.Expander`2.ExpandIntoStringLeaveEscaped(String expression, ExpanderOptions options, IElementLocation elementLocation)
+   à Microsoft.Build.Evaluation.ToolsetReader.ExpandPropertyUnescaped(ToolsetPropertyDefinition property, Expander`2 expander)
+   à Microsoft.Build.Evaluation.ToolsetReader.EvaluateAndSetProperty(ToolsetPropertyDefinition property, PropertyDictionary`1 properties, PropertyDictionary`1 globalProperties, PropertyDictionary`1 initialProperties, Boolean accumulateProperties, String& toolsPath, String& binPath, Expander`2& expander)
+   à Microsoft.Build.Evaluation.ToolsetReader.ReadToolset(ToolsetPropertyDefinition toolsVersion, PropertyDictionary`1 globalProperties, PropertyDictionary`1 initialProperties, Boolean accumulateProperties)
+   à Microsoft.Build.Evaluation.ToolsetReader.ReadEachToolset(Dictionary`2 toolsets, PropertyDictionary`1 globalProperties, PropertyDictionary`1 initialProperties, Boolean accumulateProperties)
+   à Microsoft.Build.Evaluation.ToolsetReader.ReadToolsets(Dictionary`2 toolsets, PropertyDictionary`1 globalProperties, PropertyDictionary`1 initialProperties, Boolean accumulateProperties, String& msBuildOverrideTasksPath, String& defaultOverrideToolsVersion)
+   à Microsoft.Build.Evaluation.ToolsetReader.<ReadAllToolsets>g__ReadConfigToolset|11_0(<>c__DisplayClass11_0& )
+   à Microsoft.Build.Evaluation.ToolsetReader.ReadAllToolsets(Dictionary`2 toolsets, ToolsetRegistryReader registryReader, ToolsetConfigurationReader configurationReader, PropertyDictionary`1 environmentProperties, PropertyDictionary`1 globalProperties, ToolsetDefinitionLocations locations)
+   à Microsoft.Build.Evaluation.ProjectCollection.InitializeToolsetCollection(ToolsetRegistryReader registryReader, ToolsetConfigurationReader configReader)
+   à Microsoft.Build.Evaluation.ProjectCollection..ctor(IDictionary`2 globalProperties, IEnumerable`1 loggers, IEnumerable`1 remoteLoggers, ToolsetDefinitionLocations toolsetDefinitionLocations, Int32 maxNodeCount, Boolean onlyLogCriticalEvents, Boolean loadProjectsReadOnly, Boolean useAsynchronousLogging, Boolean reuseProjectRootElementCache, Boolean enableTargetOutputLogging)
+   à Microsoft.Build.Evaluation.ProjectCollection..ctor()
+   à Microsoft.SourceBrowser.HtmlGenerator.ProjectGenerator.GenerateProjectFile() dans C:\HOMEWARE\ARD\repos\SourceBrowser\src\HtmlGenerator\Pass1-Generation\ProjectGenerator.ProjectFile.cs:ligne 35
+10:57:38 Declarations...
+10:57:38 Base members...
+10:57:38 Implemented interface members...
+10:57:38 Project info...
+10:57:38 References data files...
+10:57:39 Symbol ID to list of locations map...
+10:57:39 Referenced assembly list...
+10:57:39 Project Explorer...
+10:57:39 Namespace Explorer...
+10:57:39 index.html...
+10:57:40 C:\HOMEWARE\ARD\repos\ying\Applicative\Highway\GateWay\Tests\Highway.GateWay.UnitTests.csproj
+10:57:40 Document doesn't exist on disk: C:\HOMEWARE\ARD\repos\ying\.ard\obj\Highway.GateWay.UnitTests\Win32\Release\net471\.NETFramework,Version=v4.7.1.AssemblyAttributes.cs
+10:57:40 Document doesn't exist on disk: C:\HOMEWARE\ARD\repos\ying\.ard\obj\Highway.GateWay.UnitTests\Win32\Release\net471\Highway.GateWay.UnitTests.AssemblyInfo.cs
+10:57:41 Ard.Highway.GateWay.UnitTests references an assembly that cannot be resolved: mscorlib
+10:57:41 Ard.Highway.GateWay.UnitTests references an assembly that cannot be resolved: nunit.framework
+10:57:41 Ard.Highway.GateWay.UnitTests references an assembly that cannot be resolved: Ard.Highway.GateWayApi
+10:57:41 Ard.Highway.GateWay.UnitTests references an assembly that cannot be resolved: System
+10:57:41 Ard.Highway.GateWay.UnitTests references an assembly that cannot be resolved: Sgcib.Mark.Ard.MagnetoApi
+10:57:41 Ard.Highway.GateWay.UnitTests references an assembly that cannot be resolved: Ard.HighwayBaseApi
+10:57:41 Ard.Highway.GateWay.UnitTests references an assembly that cannot be resolved: Sgcib.Mark.Ard.Highway.DatabaseApi
+10:57:41 Ard.Highway.GateWay.UnitTests references an assembly that cannot be resolved: Sgcib.Mark.Ard.Highway.PrivateApi
+10:57:41 Ard.Highway.GateWay.UnitTests references an assembly that cannot be resolved: Ard.SonicApi
+10:57:41 Ard.Highway.GateWay.UnitTests references an assembly that cannot be resolved: Moq
+10:57:41 Ard.Highway.GateWay.UnitTests references an assembly that cannot be resolved: System.Core
+10:57:41 Ard.Highway.GateWay.UnitTests references an assembly that cannot be resolved: Ard.Highway.Gateway.PrivateApi
+10:57:41 Ard.Highway.GateWay.UnitTests references an assembly that cannot be resolved: Ard.AzureAccessApi
+10:57:41 Ard.Highway.GateWay.UnitTests references an assembly that cannot be resolved: log4net
+10:57:41 Ard.Highway.GateWay.UnitTests references an assembly that cannot be resolved: Ard.Sonic.PrivateInterfaces
+10:57:41 Ard.Highway.GateWay.UnitTests references an assembly that cannot be resolved: System.Collections.Immutable
+10:57:41 Ard.Highway.GateWay.UnitTests references an assembly that cannot be resolved: Ard.Highway.Store.BaseApi
+10:57:41 Ard.Highway.GateWay.UnitTests references an assembly that cannot be resolved: Ard.Basics.Common.SimpleTypes
+10:57:41 Ard.Highway.GateWay.UnitTests references an assembly that cannot be resolved: Ard.AsyncUtilities
+10:57:41 Ard.Highway.GateWay.UnitTests references an assembly that cannot be resolved: Socgen.Defi.Tau.RD.BasicComponents
+10:57:41 Ard.Highway.GateWay.UnitTests references an assembly that cannot be resolved: Ard.HighwayReplay.Gateway
+10:57:41 Ard.Highway.GateWay.UnitTests references an assembly that cannot be resolved: Newtonsoft.Json
+10:57:41 Ard.Highway.GateWay.UnitTests references an assembly that cannot be resolved: Arkheion
+10:57:41 Ard.Highway.GateWay.UnitTests references an assembly that cannot be resolved: JetBrains.Annotations
+10:57:41 Ard.Highway.GateWay.UnitTests references an assembly that cannot be resolved: System.Net.Http
+10:57:41 Ard.Highway.GateWay.UnitTests references an assembly that cannot be resolved: Sgcib.Mark.Ard.Magneto.Store
+10:57:41 Ard.Highway.GateWay.UnitTests references an assembly that cannot be resolved: Ard.Sonic.Runner
+10:57:41 Ard.Highway.GateWay.UnitTests references an assembly that cannot be resolved: Sgcib.Mark.Ard.Magneto.Config.ConfTypes
+10:57:41 Ard.Highway.GateWay.UnitTests references an assembly that cannot be resolved: Ard.Sonic.Utilities
+10:57:41 Ard.Highway.GateWay.UnitTests references an assembly that cannot be resolved: FluentAssertions
+10:57:41 Ard.Highway.GateWay.UnitTests references an assembly that cannot be resolved: Sgcib.Mark.Ard.Highway.DatabaseUnitTests
+10:57:41 Ard.Highway.GateWay.UnitTests references an assembly that cannot be resolved: Ard.Dotnet.Extensions
+10:57:41 Ard.Highway.GateWay.UnitTests references an assembly that cannot be resolved: Microsoft.Extensions.Caching.Memory
+10:57:41 Ard.Highway.GateWay.UnitTests references an assembly that cannot be resolved: Microsoft.Extensions.Options
+10:57:41 Ard.Highway.GateWay.UnitTests references an assembly that cannot be resolved: Microsoft.Extensions.Caching.Abstractions
+10:57:41 Ard.Highway.GateWay.UnitTests references an assembly that cannot be resolved: Ard.Highway.ProductStoreApi
+10:57:41 Ard.Highway.GateWay.UnitTests references an assembly that cannot be resolved: Ard.PipelineApi
+10:57:41 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.UnitTests
+10:57:41 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.UnitTests\GlobalTestConfigurator.cs.html
+10:57:41 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.UnitTests\AssemblyInfo.cs.html
+10:57:41 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.UnitTests\ProjectDependenciesChecker.cs.html
+10:57:41 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.UnitTests\Security\AuthorizationTests.cs.html
+10:57:41 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.UnitTests\GateWayTestHelpers.cs.html
+10:57:41 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.UnitTests\BackgroundTasks\LongRunningJobKillerTests.cs.html
+10:57:41 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.UnitTests\CvaPreTradeConfigShould.cs.html
+10:57:41 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.UnitTests\OutputFilesTest.cs.html
+10:57:41 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.UnitTests\ChangeTemplate\ProcessorsTests.cs.html
+10:57:41 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.UnitTests\Mocks.cs.html
+10:57:41 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.UnitTests\Replay\ReplayExecutorWithMockTests.cs.html
+10:57:41 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.UnitTests\ChangeTemplate\ChangeTemplateStoreTest.cs.html
+10:57:41 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.UnitTests\MappingExtensions.cs.html
+10:57:41 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.UnitTests\ChangeTemplate\TemplateRetrieverFactoryTest.cs.html
+10:57:41 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.UnitTests\ChangeTemplate\ValueConstraintsTests.cs.html
+10:57:41 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.UnitTests\JsonSerializationTest.cs.html
+10:57:41 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.UnitTests\Model\RiskAnalysisDef\JsonConverters\RiskAnalysisDefConverterTest.cs.html
+10:57:41 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.UnitTests\Model\Scope\ScopeItemsTests.cs.html
+10:57:41 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.UnitTests\Security\UserPermissionsFromSgIamTests.cs.html
+10:57:41 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.UnitTests\Security\PermissionsTests.cs.html
+10:57:41 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.UnitTests\ChangeTemplate\ChangeTemplateApplierTests.cs.html
+10:57:41 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.UnitTests\ChangeTemplate\TemplateRetrieverTest.cs.html
+10:57:41 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.UnitTests\Services\DatabaseBasedAzureRegionTogglerTests.cs.html
+10:57:41 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.UnitTests\Command\GateWayActionsTest.cs.html
+10:57:41 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.UnitTests\Services\DatacenterRuntimeConfigAzureRegionTogglerTests.cs.html
+10:57:41 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.UnitTests\Services\DatacenterRuntimeConfigServiceTests.cs.html
+10:57:41 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.UnitTests\Services\HoconConfigurationServiceTests.cs.html
+10:57:41 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Ard.Highway.GateWay.UnitTests\TestRequestActivity.cs.html
+10:57:41 Exception during Project file generation: C:\HOMEWARE\ARD\repos\ying\Applicative\Highway\GateWay\Tests\Highway.GateWay.UnitTests.csproj
+System.MissingMethodException: Méthode introuvable : 'Boolean Microsoft.NET.StringTools.SpanBasedStringBuilder.Equals(System.ReadOnlySpan`1<Char>)'.
+   à Microsoft.Build.Evaluation.Expander`2.MetadataExpander.ExpandMetadataLeaveEscaped(String expression, IMetadataTable metadata, ExpanderOptions options, IElementLocation elementLocation, LoggingContext loggingContext)
+   à Microsoft.Build.Evaluation.Expander`2.ExpandIntoStringLeaveEscaped(String expression, ExpanderOptions options, IElementLocation elementLocation)
+   à Microsoft.Build.Evaluation.ToolsetReader.ExpandPropertyUnescaped(ToolsetPropertyDefinition property, Expander`2 expander)
+   à Microsoft.Build.Evaluation.ToolsetReader.EvaluateAndSetProperty(ToolsetPropertyDefinition property, PropertyDictionary`1 properties, PropertyDictionary`1 globalProperties, PropertyDictionary`1 initialProperties, Boolean accumulateProperties, String& toolsPath, String& binPath, Expander`2& expander)
+   à Microsoft.Build.Evaluation.ToolsetReader.ReadToolset(ToolsetPropertyDefinition toolsVersion, PropertyDictionary`1 globalProperties, PropertyDictionary`1 initialProperties, Boolean accumulateProperties)
+   à Microsoft.Build.Evaluation.ToolsetReader.ReadEachToolset(Dictionary`2 toolsets, PropertyDictionary`1 globalProperties, PropertyDictionary`1 initialProperties, Boolean accumulateProperties)
+   à Microsoft.Build.Evaluation.ToolsetReader.ReadToolsets(Dictionary`2 toolsets, PropertyDictionary`1 globalProperties, PropertyDictionary`1 initialProperties, Boolean accumulateProperties, String& msBuildOverrideTasksPath, String& defaultOverrideToolsVersion)
+   à Microsoft.Build.Evaluation.ToolsetReader.<ReadAllToolsets>g__ReadConfigToolset|11_0(<>c__DisplayClass11_0& )
+   à Microsoft.Build.Evaluation.ToolsetReader.ReadAllToolsets(Dictionary`2 toolsets, ToolsetRegistryReader registryReader, ToolsetConfigurationReader configurationReader, PropertyDictionary`1 environmentProperties, PropertyDictionary`1 globalProperties, ToolsetDefinitionLocations locations)
+   à Microsoft.Build.Evaluation.ProjectCollection.InitializeToolsetCollection(ToolsetRegistryReader registryReader, ToolsetConfigurationReader configReader)
+   à Microsoft.Build.Evaluation.ProjectCollection..ctor(IDictionary`2 globalProperties, IEnumerable`1 loggers, IEnumerable`1 remoteLoggers, ToolsetDefinitionLocations toolsetDefinitionLocations, Int32 maxNodeCount, Boolean onlyLogCriticalEvents, Boolean loadProjectsReadOnly, Boolean useAsynchronousLogging, Boolean reuseProjectRootElementCache, Boolean enableTargetOutputLogging)
+   à Microsoft.Build.Evaluation.ProjectCollection..ctor()
+   à Microsoft.SourceBrowser.HtmlGenerator.ProjectGenerator.GenerateProjectFile() dans C:\HOMEWARE\ARD\repos\SourceBrowser\src\HtmlGenerator\Pass1-Generation\ProjectGenerator.ProjectFile.cs:ligne 35
+10:57:41 Declarations...
+10:57:41 Base members...
+10:57:41 Implemented interface members...
+10:57:41 Project info...
+10:57:41 References data files...
+10:57:42 Symbol ID to list of locations map...
+10:57:42 Referenced assembly list...
+10:57:42 Project Explorer...
+10:57:42 Namespace Explorer...
+10:57:42 index.html...
+10:57:42 C:\HOMEWARE\ARD\repos\ying\Applicative\Highway\Tools\Launcher\Prod\Highway.Launcher.csproj
+10:57:42 Document doesn't exist on disk: C:\HOMEWARE\ARD\repos\ying\.ard\obj\Highway.Launcher\Win32\Release\net471\.NETFramework,Version=v4.7.1.AssemblyAttributes.cs
+10:57:42 Document doesn't exist on disk: C:\HOMEWARE\ARD\repos\ying\.ard\obj\Highway.Launcher\Win32\Release\net471\Highway.Launcher.AssemblyInfo.cs
+10:57:42 17/08/2026 10:57:42: First chance exception
+System.BadImageFormatException: L'image PE ne contient pas de métadonnées gérées.
+   à Microsoft.CodeAnalysis.PEModule.InitializeMetadataReader()
+10:57:42 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher
+10:57:42 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\AssemblyInfo.cs.html
+10:57:42 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\AssemblyInfoGxyVersion.cs.html
+10:57:42 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\DeadCodeAttribute.cs.html
+10:57:42 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\BaseAction.cs.html
+10:57:42 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Actions.cs.html
+10:57:42 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\HtmlReporter\HtmlReporterTemplateModel.cs.html
+10:57:42 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\JobMetadata.cs.html
+10:57:42 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\HtmlReporter\CustomRazorTemplateWithInclude.cs.html
+10:57:42 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\Emulators\SqlEmulator.cs.html
+10:57:42 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\Gateway\HttpBasedClient\DebugHttpGatewayClient.cs.html
+10:57:42 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\Emulators\AzureEmulator.cs.html
+10:57:42 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\Emulators\EmulatorContext.cs.html
+10:57:42 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\ElasticSearchConfigFactory.cs.html
+10:57:42 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\Gateway\InProcClient\LocalGatewayActions.cs.html
+10:57:42 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\HighwayMonitoring\HighwayMonitoringApiClient.cs.html
+10:57:42 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\Emulators\IAsgEmulator.cs.html
+10:57:42 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\Gateway\IGatewayActions.cs.html
+10:57:42 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\Emulators\ICassandraEmulator.cs.html
+10:57:42 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\HighwayMonitoring\HighwayMonitoringClientConfig.cs.html
+10:57:42 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\HighwayMonitoring\JobProperties.cs.html
+10:57:42 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\HtmlReporter\HtmlReporter.cs.html
+10:57:42 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\Gateway\GatewayClientFactory.cs.html
+10:57:42 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\Emulators\DatabaseEmulatorsFactory.cs.html
+10:57:42 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\Gateway\HttpBasedClient\HttpGatewayActions.cs.html
+10:57:43 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\JobResults.cs.html
+10:57:43 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\JobResultStatus.cs.html
+10:57:43 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\DailyKpiAnalyser\DailyJobsKpiAnalyser.cs.html
+10:57:43 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\DailyKpiAnalyser\FullKpiExporterByLE.cs.html
+10:57:43 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\DailyKpiAnalyser\FullKpiExporterByLETest.cs.html
+10:57:43 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\CompareKpiAnalyser.cs.html
+10:57:43 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\Core\ActiveDurationKpisStudy.cs.html
+10:57:43 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\Core\AnalyzerUtils.cs.html
+10:57:43 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\Core\Constants.cs.html
+10:57:43 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\Core\Format.cs.html
+10:57:43 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\Core\HttpAccessLogsStudy.cs.html
+10:57:43 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\Core\KpiStudiesReporter.cs.html
+10:57:43 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\Core\KpiStudyMessage.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\Core\OutputCsvBuilder.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\Core\ParallelismAnalyser.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\Core\StoreKpisStudy.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\Core\TasksAccumulator.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\FullKpiAnalyser.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\FullKpisAnalyser.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\IAnalysisFlameChartReporter.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\IAnalysisPieChartReporter.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\IAnalysisReporter.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\IKpiStudy.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\Operation.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\Reporters\CompositeAnalysisReporter.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\Reporters\CompositeFlameChartReporter.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\IAnalysisTableReporter.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\Reporters\CompositePieChartReporter.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\Reporters\ConsoleAnalysisReporter.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\Reporters\CompositeTableReporter.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\Reporters\HtmlFlameChartReporter.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\Reporters\HtmlAnalysisReporter.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\Reporters\SimpleTextAnalysisReporter.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\Reporters\HtmlTableReporter.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\Reporters\TextPieChartReporter.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\Reporters\TextTableReporter.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\Reporters\TextWriterAnalysisReporter.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\Studies\CloudActivityStudy.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\Studies\CompositeKpiStudy.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\Studies\GraphConstructionStudy.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\Reporters\TextFlameChartReporter.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\Studies\HubTasksCounter.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\Studies\JobRunnerLogStudy.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\Studies\LogStudy.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\Reporters\ComparisonHtmlReport.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\Studies\MarvelActivitiesStudy.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\Studies\MarvelTasksAnalyser.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\Studies\SelectiveKpiStudy.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\Studies\DataLoadersStudy.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\Studies\StoreUsageStudy.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\Studies\AggregatedMetricsStudy.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\Studies\TaskExecutorComputiongDurationStudy.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\Studies\TopRelatedToStudy.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\Studies\StatisticalStudy.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\Studies\TwistAnalysisStudy.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\Reporters\HtmlPieChartReporter.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\KpiAnalyser.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\ProfileHelper.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\KpiUpdater.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\Studies\TimeoutTasksStudy.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\Studies\JobDurationStudy.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Sequencers\CommandLine\DualItemCommandLineBuilder.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Sequencers\CommandLine\ExternalCommandLineBuilder.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\RequestProfile.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Sequencers\CommandLine\ProfileCommandLineBuilder.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Sequencers\Dual\Analysis.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Sequencers\Dual\DualSequencerManager.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Sequencers\Dual\DualSequencerParsers.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\KpiCleaner.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Sequencers\Dual\JobRetrievalResult.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Sequencers\CommandLine\ChangeRequestBuilder.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\KpiTools\FullKpiAnalysis\Studies\MemoryEagerStudy.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Sequencers\Dual\launchDualSequence.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Sequencers\Graph\SequenceGraph.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Sequencers\Graph\SequenceGraphRunner.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Sequencers\LaunchCliArgs.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Sequencers\Graph\SequenceGraphParser.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Sequencers\ProcessRunner\ISequencerProcessRunner.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Sequencers\CommandLine\SequencerCommandLineBuilder.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Sequencers\ProcessRunner\SequencerProcessRunnerFactory.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Sequencers\CommandLine\InternalCommandLineBuilder.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Sequencers\Reporters\SequencerHtmlReporter.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Sequencers\Dual\DualSequencer.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Sequencers\Reporters\StatusReporter.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Sequencers\Single\LaunchSequence.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Sequencers\Dual\TestDualSequencer.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Sequencers\Single\Sequencer.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Sequencers\Reporters\HtmlReader.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\TaskReplay\HubDumpInstrumenter.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\TaskReplay\TestTaskReplay.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Sequencers\Single\SequenceDurationManager.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Tools\AsgClientContext.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Sequencers\Reporters\SequencerHtmlReporterTemplateModel.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Tools\AzureAvailableBlob.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Tools\BulkDecoratedConfigExporter.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Tools\FxRatesExtractor.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Tools\JobInfoFromHighwayMonitoring.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Sequencers\ProcessRunner\SequencerProcessRunner.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Tools\PrimaryLogParser.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Sequencers\SequencerHelper.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Tools\QAReport\QaAdvancementReport.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Tools\QAReport\AmazonS3Credentials.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Sequencers\SequencerOutputFolders.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Tools\QAReport\QaReportEntry.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Tools\GatewayModelRegression\TestGatewayModelRegression.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Tools\AzureJobFailures.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Sequencers\Single\JobSummary.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Tools\QAReport\S3Access.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Tools\LocalCluster.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Tools\TaskIdConverter.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\WithGateway\BaseActionWithGatewayContext.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\WithGateway\HoconUploader\AzureHoconUploader.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\TaskReplay\TaskReplayAction.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Tools\AnalysisFromDualSequencerArtifacts.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\WithGateway\HoconUploader\NetworkHoconUploader.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\WithGateway\HoconUploader\AzureHoconUploaderConfig.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\WithGateway\JobStarters\ExportLauncher.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Tools\QAReport\TeamCityUrlBuilder.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\WithGateway\HoconUploader\NetworkHoconUploaderConfig.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\WithGateway\JobStarters\LightLauncher.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Sequencers\Dual\JobExecutionInfo.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\LauncherParserContext.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Tools\QAReport\QaReportResult.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\WithGateway\JobStarters\Relauncher.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\WithGateway\JobStarters\RequestCreator.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\WithGateway\JobStarters\RequestUpdaterContext.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\WithGateway\BaseActionWithGateway.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\WithGateway\JobStarters\UserProfileSelector.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\WithGateway\Misc\EnvironmentDescriber.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Tools\ReplaceReferences.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\WithGateway\Misc\GatewayTemplatesTester.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\WithGateway\Misc\ExportJobKiller.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\WithGateway\JobStarters\Launcher.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\WithGateway\BaseJobStarterAction.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\WithGateway\Monitoring\JobStatsExporter.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Tools\QAReport\QaHtmlReporter.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\WithGateway\ResultRetrieval\ErrorsExporter.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\WithGateway\JobStarters\PricerInputsDumper.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\WithGateway\ResultRetrieval\RequestExporter.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\Manager\FileDownloader.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\WithGateway\ResultRetrieval\ResultsExporter.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\Manager\JobResultsRetriever.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\RuntimeReferences.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\SharedCommandArgs.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\WithGateway\JobStarters\StartJobContext.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\WithGateway\ResultRetrieval\KpiExporter.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\WithGateway\LaunchUtils.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Tools\SolstisConverter.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\WithGateway\Misc\AboutHelper.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\WithGateway\Monitoring\Monitor.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\Manager\JobKpiRetriever.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\WithGateway\ResultRetrieval\SolstisStreamer.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\WithGateway\Misc\DataCentersHelper.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\Tools\DecoratedConfigExporter.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\WithGateway\ResultRetrieval\Supporter.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\WithGateway\JobStarters\RequestHelper.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\Manager\RequestManager.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\WithGateway\BaseJobStarterActionContext.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\Manager\StatusManager.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\WithGateway\Misc\HighwayReplay.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\WithGateway\Misc\JobKiller.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\WithGateway\Monitoring\HistoricalActivityHelper.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\Program.cs.html
+10:57:44 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\WithGateway\GatewayEnvironment.cs.html
+10:57:46 C:\HOMEWARE\ARD\repos\SourceBrowser\src\SourceIndexServer\index\index\Sgcib.Mark.Ard.Highway.Launcher\LauncherActions\ProfileType.cs.html
+10:57:46 Exception during Project file generation: C:\HOMEWARE\ARD\repos\ying\Applicative\Highway\Tools\Launcher\Prod\Highway.Launcher.csproj
+System.MissingMethodException: Méthode introuvable : 'Boolean Microsoft.NET.StringTools.SpanBasedStringBuilder.Equals(System.ReadOnlySpan`1<Char>)'.
+   à Microsoft.Build.Evaluation.Expander`2.MetadataExpander.ExpandMetadataLeaveEscaped(String expression, IMetadataTable metadata, ExpanderOptions options, IElementLocation elementLocation, LoggingContext loggingContext)
+   à Microsoft.Build.Evaluation.Expander`2.ExpandIntoStringLeaveEscaped(String expression, ExpanderOptions options, IElementLocation elementLocation)
+   à Microsoft.Build.Evaluation.ToolsetReader.ExpandPropertyUnescaped(ToolsetPropertyDefinition property, Expander`2 expander)
+   à Microsoft.Build.Evaluation.ToolsetReader.EvaluateAndSetProperty(ToolsetPropertyDefinition property, PropertyDictionary`1 properties, PropertyDictionary`1 globalProperties, PropertyDictionary`1 initialProperties, Boolean accumulateProperties, String& toolsPath, String& binPath, Expander`2& expander)
+   à Microsoft.Build.Evaluation.ToolsetReader.ReadToolset(ToolsetPropertyDefinition toolsVersion, PropertyDictionary`1 globalProperties, PropertyDictionary`1 initialProperties, Boolean accumulateProperties)
+   à Microsoft.Build.Evaluation.ToolsetReader.ReadEachToolset(Dictionary`2 toolsets, PropertyDictionary`1 globalProperties, PropertyDictionary`1 initialProperties, Boolean accumulateProperties)
+   à Microsoft.Build.Evaluation.ToolsetReader.ReadToolsets(Dictionary`2 toolsets, PropertyDictionary`1 globalProperties, PropertyDictionary`1 initialProperties, Boolean accumulateProperties, String& msBuildOverrideTasksPath, String& defaultOverrideToolsVersion)
+   à Microsoft.Build.Evaluation.ToolsetReader.<ReadAllToolsets>g__ReadConfigToolset|11_0(<>c__DisplayClass11_0& )
+   à Microsoft.Build.Evaluation.ToolsetReader.ReadAllToolsets(Dictionary`2 toolsets, ToolsetRegistryReader registryReader, ToolsetConfigurationReader configurationReader, PropertyDictionary`1 environmentProperties, PropertyDictionary`1 globalProperties, ToolsetDefinitionLocations locations)
+   à Microsoft.Build.Evaluation.ProjectCollection.InitializeToolsetCollection(ToolsetRegistryReader registryReader, ToolsetConfigurationReader configReader)
+   à Microsoft.Build.Evaluation.ProjectCollection..ctor(IDictionary`2 globalProperties, IEnumerable`1 loggers, IEnumerable`1 remoteLoggers, ToolsetDefinitionLocations toolsetDefinitionLocations, Int32 maxNodeCount, Boolean onlyLogCriticalEvents, Boolean loadProjectsReadOnly, Boolean useAsynchronousLogging, Boolean reuseProjectRootElementCache, Boolean enableTargetOutputLogging)
+   à Microsoft.Build.Evaluation.ProjectCollection..ctor()
+   à Microsoft.SourceBrowser.HtmlGenerator.ProjectGenerator.GenerateProjectFile() dans C:\HOMEWARE\ARD\repos\SourceBrowser\src\HtmlGenerator\Pass1-Generation\ProjectGenerator.ProjectFile.cs:ligne 35
+10:57:46 Declarations...
+10:57:46 Base members...
+10:57:46 Implemented interface members...
+10:57:46 Project info...
+10:57:46 References data files...
+10:57:49 Symbol ID to list of locations map...
+10:57:49 Referenced assembly list...
+10:57:50 Project Explorer...
+10:57:50 Namespace Explorer...
+10:57:50 index.html...
+10:57:50 Generating C:\Users\M045143\Downloads\Compile_Win32Release_26.0.0_4911.binlog complete. Took: 00:00:20.4323711
+10:57:50 Declarations...
+10:57:50 Symbol ID to list of locations map...
+10:57:50 Declarations...
+10:57:50 Symbol ID to list of locations map...
+10:57:50 Finalizing references
+10:57:50 Calculating referencing assemblies
+10:57:50 Calculating referencing assemblies complete. Took: 00:00:00.0009555
+10:57:50 Solution Explorer...
+10:57:50 Backpatching unreferenced declarations in Ard.Highway.GateWay.Fwk
+10:57:50 Backpatching unreferenced declarations in TypeScriptFiles
+10:57:50 Backpatching unreferenced declarations in MSBuildFiles
+10:57:50 Backpatching unreferenced declarations in Ard.Highway.Gateway.Common
+10:57:50 Backpatching unreferenced declarations in Sgcib.Mark.Ard.Highway.Launcher
+10:57:50 Backpatching unreferenced declarations in Ard.Highway.GateWay.UnitTests
+10:57:50 Creating references files for mscorlib
+10:57:50 Creating references files for Ard.Highway.GateWay.UnitTests
+10:57:51 Creating references files for Ard.Highway.GateWay.Fwk
+10:57:51 Creating references files for Ard.Highway.Gateway.Common
+10:57:51 Creating references files for Sgcib.Mark.Ard.Highway.Launcher
+10:57:55 Merging declared symbols: 00:00:00.0004719
+10:57:55 Sorting symbols: 00:00:00.0164451
+10:57:56 Creating Huffman tables: 00:00:00.0403324
+10:57:56 Writing declared symbols to disk...: 00:00:00.2607475
+10:57:56 Writing declared symbols: 00:00:00.3176071
+10:57:56 Normalizing...: 00:00:00.0276961
+10:57:56 Writing project map: 00:00:00.0031976
+10:57:56 Writing referencing assemblies
+10:57:56 Writing referencing assemblies complete. Took: 00:00:00.0050577
+10:57:56 Finalizing references complete. Took: 00:00:05.9080647
+10:57:58 Generating website complete. Took: 00:01:08.7795365

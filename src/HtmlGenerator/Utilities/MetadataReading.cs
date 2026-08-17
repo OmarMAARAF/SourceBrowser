@@ -81,8 +81,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 return Enumerable.Empty<string>();
             }
 
-            var references = GetReferencePaths(symbol);
-            return references.ToArray();
+            var references = GetReferencePaths(symbol, metadataReference.Display);
+            return references.Select(r => r.Path).ToArray();
         }
 
         private static IEnumerable<string> resolutionPaths = new[]
@@ -93,18 +93,18 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             "wpf"
         };
 
-        public static IEnumerable<string> GetReferencePaths(IAssemblySymbol assemblySymbol)
+        public static IEnumerable<(string Name, string Path)> GetReferencePaths(IAssemblySymbol assemblySymbol, string sourcePath = null)
         {
             foreach (var referenceIdentity in GetReferences(assemblySymbol))
             {
                 var resolved = Resolve(referenceIdentity.Name);
                 if (!string.IsNullOrEmpty(resolved))
                 {
-                    yield return resolved;
+                    yield return (referenceIdentity.Name, resolved);
                 }
                 else
                 {
-                    Log.Message(SymbolIdService.GetAssemblyId(assemblySymbol) + " references an assembly that cannot be resolved: " + referenceIdentity.Name);
+                    Log.Message(SymbolIdService.GetAssemblyId(assemblySymbol) + (sourcePath != null ? " (" + sourcePath + ")" : "") + " references an assembly that cannot be resolved: " + referenceIdentity.Name);
                 }
             }
         }
@@ -134,10 +134,10 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 return null;
             }
 
-            var referencePaths = GetReferencePaths(assemblySymbol);
+            var referencePaths = GetReferencePaths(assemblySymbol, metadataReference.Display);
             foreach (var referencePath in referencePaths)
             {
-                var reference = MetadataAsSource.CreateReferenceFromFilePath(referencePath);
+                var reference = MetadataAsSource.CreateReferenceFromFilePath(referencePath.Path);
                 compilation = compilation.AddReferences(reference);
             }
 

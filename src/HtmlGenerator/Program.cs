@@ -16,6 +16,11 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 {
     public class Program
     {
+        private static List<string> assymbliesToRead = new List<string>(new [] {
+            "Ard.Highway.Gateway.Common",
+            "Ard.Highway.GateWay.Fwk",
+            "Ard.Highway.GateWay.UnitTests",
+            "Sgcib.Mark.Ard.Highway.Launcher"});
         private static async Task Main(string[] args)
         {
             var options = CommandLineOptions.Parse(args);
@@ -199,7 +204,10 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
         /// Without this check, some assemblies cannot be resolved, which can lead to missing references and broken navigation
         private static string TryResolveAssemblyPathFromStandardStructure(string originalPath, string assemblyName, string replacementRoot)
         {
-            if (string.IsNullOrEmpty(replacementRoot) || string.IsNullOrEmpty(originalPath)) return null;
+            if (string.IsNullOrEmpty(replacementRoot) || string.IsNullOrEmpty(originalPath))
+            {
+                return null;
+            }
             try
             {
                 // Extract framework from original path (e.g., "net471" from ...net471\Ard.Marvel.Minds.Core.dll)
@@ -236,7 +244,9 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 }
                 commonPrefix = GetLongestCommonDirectoryPrefix(commonPrefix, dir);
                 if (string.IsNullOrEmpty(commonPrefix))
+                {
                     return null;
+                }
             }
             return commonPrefix;
         }
@@ -255,8 +265,14 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 // Treat '/' and '\' as equivalent separators
                 bool isSep1 = c1 == '\\' || c1 == '/';
                 bool isSep2 = c2 == '\\' || c2 == '/';
-                if (isSep1 && isSep2) lastSep = i;
-                else if (c1 != c2) break;
+                if (isSep1 && isSep2)
+                {
+                    lastSep = i;
+                }
+                else if (c1 != c2)
+                {
+                    break;
+                }
             }
             // If one path is a prefix of the other and ends at a separator boundary
             if (minLen < Math.Max(path1.Length, path2.Length) && minLen > 0)
@@ -274,10 +290,16 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
         private static string ReplaceRootInPath(string projectPath, string oldRoot, string newRoot)
         {
-            if (string.IsNullOrEmpty(projectPath)) return projectPath;
+            if (string.IsNullOrEmpty(projectPath))
+            {
+                return projectPath;
+            }
             var normalizedPath = Path.GetFullPath(projectPath);
             var normalizedOldRoot = Path.GetFullPath(oldRoot).TrimEnd('\\', '/');
-            if (!Paths.IsOrContains(normalizedOldRoot, normalizedPath)) return projectPath;
+            if (!Paths.IsOrContains(normalizedOldRoot, normalizedPath))
+            {
+                return projectPath;
+            }
             var relativePath = Paths.MakeRelativeToFolder(normalizedPath, normalizedOldRoot);
             return Path.GetFullPath(Path.Combine(newRoot, relativePath));
         }
@@ -349,7 +371,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             }
 
             // Temporary: only index Highway assemblies to speed up test runs.
-            assemblyNames.RemoveWhere(n => !n.StartsWith("Highway", StringComparison.OrdinalIgnoreCase));
+            assemblyNames.RemoveWhere(n => ! assymbliesToRead.Contains(n));
             Log.Message($"Assembly filter active (hardcoded: Highway): {assemblyNames.Count} assemblies kept.");
 
             var processedAssemblyList = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -383,7 +405,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
                         // Temporary: mirror the assemblyNames filter so we don't process non-Highway projects.
                         invocations = invocations
-                            .Where(inv => (inv.AssemblyName ?? "").StartsWith("Highway", StringComparison.OrdinalIgnoreCase))
+                            .Where(inv => assymbliesToRead.Contains(inv.AssemblyName))
                             .ToArray();
                         Log.Message($"Assembly filter: kept {invocations.Length} invocation(s) matching 'Highway'.");
                         // Build a map of assembly names to their physical DLL paths from all references found in the binlog.
@@ -396,7 +418,39 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
                         Log.Message($"LocalReferenceAssemblyMap has {SolutionGenerator.LocalReferenceAssemblyMap.Count} entr(ies) after registering outputs for '{path}'.");
 
-                        foreach (var invocation in invocations)
+                        // TypeScript invocations and metadata-as-source invocations (no source project,
+                        // ProjectFilePath == "-") can't participate in a combined Roslyn solution; keep
+                        // processing those one at a time as before. Everything else is combined into a
+                        // single solution so cross-assembly references bind to source symbols instead of
+                        // metadata (see SolutionGenerator.CreateFromInvocations for why that matters:
+                        // metadata-bound symbols can get a different DocumentationCommentId, so their
+                        // "usages" never join the declaration's reference file).
+                        var standaloneInvocations = invocations
+                            .Where(inv => inv.Language == "TypeScript" || inv.ProjectFilePath == "-")
+                            .ToArray();
+                        var combinedInvocations = invocations
+                            .Except(standaloneInvocations)
+                            .ToArray();
+
+                        Log.Message($"Reference-resolution mode: {combinedInvocations.Length} invocation(s) will be combined into one solution (source-to-source references); {standaloneInvocations.Length} invocation(s) processed standalone (TypeScript or metadata-as-source).");
+
+                        if (combinedInvocations.Length > 0)
+                        {
+                            Log.Message($"Building combined solution for: {string.Join(", ", combinedInvocations.Select(i => i.AssemblyName))}");
+
+                            using (var solutionGenerator = SolutionGenerator.CreateFromInvocations(
+                                combinedInvocations,
+                                binlogData.CheckoutDirectory,
+                                Paths.SolutionDestinationFolder,
+                                includeSourceGeneratedDocuments,
+                                serverPathMappings))
+                            {
+                                solutionGenerator.GlobalAssemblyList = assemblyNames;
+                                await solutionGenerator.GenerateAsync(cancellationToken, processedAssemblyList, solutionFolder);
+                            }
+                        }
+
+                        foreach (var invocation in standaloneInvocations)
                         {
                             await GenerateFromBuildLog.GenerateInvocationAsync(
                                 invocation,
@@ -407,7 +461,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                                 solutionFolder,
                                 includeSourceGeneratedDocuments: includeSourceGeneratedDocuments);
                         }
-                        
+
                         continue;
                     }
 

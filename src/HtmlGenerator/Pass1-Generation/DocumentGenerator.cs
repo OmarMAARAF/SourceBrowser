@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,6 +15,11 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 {
     public partial class DocumentGenerator
     {
+        // Cache MethodInfo by concrete service type so GetMethod() runs at most once per type
+        // rather than once per document.  Delegate.CreateDelegate from a cached MethodInfo is fast.
+        private static readonly ConcurrentDictionary<Type, MethodInfo> s_isWrittenToMethodCache = new();
+        private static readonly ConcurrentDictionary<Type, MethodInfo> s_getBindableParentMethodCache = new();
+
         public ProjectGenerator projectGenerator;
         public Document Document;
         public string documentDestinationFilePath;
@@ -49,12 +56,14 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 this.SyntaxFactsService = WorkspaceHacks.GetSyntaxFactsService(this.Document);
 
                 var semanticFactsServiceType = SemanticFactsService.GetType();
-                var isWrittenTo = semanticFactsServiceType.GetMethod("IsWrittenTo");
+                var isWrittenTo = s_isWrittenToMethodCache.GetOrAdd(semanticFactsServiceType,
+                    t => t.GetMethod("IsWrittenTo"));
                 this.isWrittenToDelegate = (Func<SemanticModel, SyntaxNode, CancellationToken, bool>)
                     Delegate.CreateDelegate(typeof(Func<SemanticModel, SyntaxNode, CancellationToken, bool>), SemanticFactsService, isWrittenTo);
 
                 var syntaxFactsServiceType = SyntaxFactsService.GetType();
-                var getBindableParent = syntaxFactsServiceType.GetMethod("TryGetBindableParent");
+                var getBindableParent = s_getBindableParentMethodCache.GetOrAdd(syntaxFactsServiceType,
+                    t => t.GetMethod("TryGetBindableParent"));
                 this.getBindableParentDelegate = (Func<SyntaxToken, SyntaxNode>)
                     Delegate.CreateDelegate(typeof(Func<SyntaxToken, SyntaxNode>), SyntaxFactsService, getBindableParent);
 
@@ -299,9 +308,16 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 return;
             }
 
+            // Flush once to drain the StreamWriter's internal buffer into the
+            // underlying stream, then track bytes written in-process from here on.
+            // This eliminates one OS flush syscall per declared symbol.
+            writer.Flush();
+            long streamPosition = writer.BaseStream.Position;
+
             foreach (var range in ranges)
             {
-                string html = GenerateRange(writer, range, lineCount);
+                string html = GenerateRange(range, lineCount, streamPosition);
+                streamPosition += Encoding.UTF8.GetByteCount(html);
                 writer.Write(html);
             }
         }
@@ -311,7 +327,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             return lineCount > 30000;
         }
 
-        private string GenerateRange(StreamWriter writer, Classification.Range range, int lineCount = 0)
+        private string GenerateRange(Classification.Range range, int lineCount, long streamPosition)
         {
             var html = range.Text;
             html = Markup.HtmlEscape(html);
@@ -370,15 +386,14 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
             if (hyperlinkInfo?.DeclaredSymbol != null)
             {
-                writer.Flush();
-                long streamPosition = writer.BaseStream.Length;
-
-                streamPosition += html.IndexOf(hyperlinkInfo.Attributes["id"] + ".html", StringComparison.Ordinal);
+                // streamPosition already tracks bytes written before this call (maintained by
+                // GeneratePre via Encoding.UTF8.GetByteCount), so no flush is needed here.
+                long symbolPosition = streamPosition + html.IndexOf(hyperlinkInfo.Attributes["id"] + ".html", StringComparison.Ordinal);
                 projectGenerator.AddDeclaredSymbol(
                     hyperlinkInfo.DeclaredSymbol,
                     hyperlinkInfo.DeclaredSymbolId,
                     documentRelativeFilePathWithoutHtmlExtension,
-                    streamPosition);
+                    symbolPosition);
             }
 
             return html;

@@ -1,6 +1,8 @@
 using System;
+using System.Linq;
 using System.Reflection;
 using Microsoft.CodeAnalysis;
+using Microsoft.SourceBrowser.Common;
 using Microsoft.VisualStudio.Language.Intellisense;
 
 namespace Microsoft.SourceBrowser.HtmlGenerator
@@ -127,7 +129,23 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
             result = symbol.GetDocumentationCommentId();
 
-            result = result.Replace("#ctor", "ctor");
+            if (Log.IsTracedSymbol(symbol.Name))
+            {
+                bool hasErrorType = (symbol as IMethodSymbol)?.Parameters.Any(p => p.Type.TypeKind == TypeKind.Error) == true
+                    || symbol.ContainingType?.TypeKind == TypeKind.Error
+                    || symbol.Kind == SymbolKind.ErrorType;
+
+                Log.Trace(symbol.Name, $"SymbolIdService.GetDocumentationCommentId: symbol='{SymbolIdService.GetDisplayString(symbol)}' " +
+                    $"kind={symbol.Kind} containingAssembly={symbol.ContainingAssembly?.Name ?? "<none>"} " +
+                    $"docCommentId={(result ?? "<NULL>")} hasErrorType={hasErrorType}" +
+                    (result == null ? " *** GetDocumentationCommentId() returned NULL - symbol id will be unstable/inconsistent across projects ***" : ""));
+            }
+
+            // GetDocumentationCommentId() can return null for certain symbols (e.g. symbols bound
+            // against an error/unresolved type from a metadata reference that failed to load). When
+            // that happens the caller-side and declaration-side ids diverge and the reference is
+            // silently dropped in Pass2 (see ProjectFinalizer.Declarations.GetLocationsToPatch).
+            result = result?.Replace("#ctor", "ctor") ?? string.Empty;
 
             return result;
         }

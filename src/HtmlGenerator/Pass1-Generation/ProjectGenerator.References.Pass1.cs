@@ -108,10 +108,16 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
             Dictionary<string, List<Reference>> referencesToAssembly = GetReferencesToAssembly(reference.ToAssemblyId);
             List<Reference> referencesToSymbol = GetReferencesToSymbol(reference, referencesToAssembly);
+            int countAfterAdd;
             lock (referencesToSymbol)
             {
                 referencesToSymbol.Add(reference);
+                countAfterAdd = referencesToSymbol.Count;
             }
+
+            Log.Trace(symbolName, $"AddReference: fromAssembly={fromAssemblyName} toAssembly={toAssemblyName} " +
+                $"symbolId={symbolId} fromFile={localPath} line={lineNumber} kind={kind} " +
+                $"(in-memory count for this symbolId under toAssembly={toAssemblyName} is now {countAfterAdd})");
         }
 
         private static List<Reference> GetReferencesToSymbol(Reference reference, Dictionary<string, List<Reference>> referencesToAssembly)
@@ -245,6 +251,12 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                         try
                         {
                             var linkDataFile = Path.Combine(assemblyReferencesDataFolder, referencesToSymbol.Key + ".txt");
+                            var traceName = referencesToSymbol.Value.Count > 0 ? referencesToSymbol.Value[0].ToSymbolName : null;
+                            if (traceName != null && Log.IsTracedSymbol(traceName))
+                            {
+                                Log.Trace(traceName, $"GenerateReferencesDataFilesToAssembly: toAssemblyId={toAssemblyId} " +
+                                    $"symbolId={referencesToSymbol.Key} appending {referencesToSymbol.Value.Count} reference(s) (append=true) to '{linkDataFile}'.");
+                            }
                             WriteSymbolReferencesToFile(referencesToSymbol.Value, linkDataFile);
                         }
                         catch (ArgumentException ex)

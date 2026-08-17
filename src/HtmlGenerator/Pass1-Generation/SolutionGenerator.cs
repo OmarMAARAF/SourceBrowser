@@ -146,6 +146,143 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 outputAssemblyPath);
         }
 
+        // Constructs a generator around a pre-built, multi-project Roslyn solution (see
+        // CreateFromInvocations). Used for the binlog path so that several co-indexed assemblies
+        // live in ONE solution and can reference each other by source rather than metadata.
+        private SolutionGenerator(
+            Solution solution,
+            string solutionSourceFolder,
+            string solutionDestinationFolder,
+            bool includeSourceGeneratedDocuments)
+        {
+            this.solution = solution;
+            this.workspace = solution?.Workspace;
+            this.SolutionSourceFolder = solutionSourceFolder;
+            this.SolutionDestinationFolder = solutionDestinationFolder;
+            this.IncludeSourceGeneratedDocuments = includeSourceGeneratedDocuments;
+            SetupPluginAggregator();
+        }
+
+        /// <summary>
+        /// Builds a single Roslyn solution containing every supplied binlog invocation as its own
+        /// project, then rewrites the metadata references that point at co-indexed assemblies into
+        /// project (source) references. This makes callers bind to the SAME source symbols the
+        /// declaration is generated from, so their DocumentationCommentId (and therefore the
+        /// SourceBrowser symbol id) matches and cross-assembly "find all references" works in
+        /// binlog mode exactly like it does when indexing a .sln. Without this, each invocation is
+        /// compiled in isolation against sibling assemblies' metadata; when a referenced type can't
+        /// be resolved locally the signature falls back to an error type, the symbol id diverges,
+        /// and the declaration page shows no usages.
+        /// </summary>
+        public static SolutionGenerator CreateFromInvocations(
+            IReadOnlyList<GenerateFromBuildLog.CompilerInvocation> invocations,
+            string solutionSourceFolder,
+            string solutionDestinationFolder,
+            bool includeSourceGeneratedDocuments,
+            IReadOnlyDictionary<string, string> serverPathMappings = null)
+        {
+            var workspace = CreateWorkspace();
+            var solution = BuildCombinedSolution(workspace, invocations);
+
+            var generator = new SolutionGenerator(
+                solution,
+                solutionSourceFolder,
+                solutionDestinationFolder,
+                includeSourceGeneratedDocuments);
+            generator.ServerPathMappings = serverPathMappings;
+            return generator;
+        }
+
+        private static Solution BuildCombinedSolution(
+            Workspace workspace,
+            IReadOnlyList<GenerateFromBuildLog.CompilerInvocation> invocations)
+        {
+            var solution = workspace.CurrentSolution;
+
+            // First pass: add every invocation as a project and remember, per project, its assembly
+            // short name, output DLL path, language, and the set of assembly names it references
+            // (taken from the ORIGINAL parsed command line so refs that get dropped/redirected below
+            // can still be turned into project references).
+            var projectIdByAssemblyName = new Dictionary<string, ProjectId>(StringComparer.OrdinalIgnoreCase);
+            var outputPathByProjectId = new Dictionary<ProjectId, string>();
+            var languageByProjectId = new Dictionary<ProjectId, string>();
+            var referencedAssemblyNamesByProjectId = new Dictionary<ProjectId, HashSet<string>>();
+
+            foreach (var invocation in invocations)
+            {
+                var projectFilePath = invocation.ProjectFilePath;
+                var projectName = Path.GetFileNameWithoutExtension(projectFilePath);
+                var language = ".vbproj".Equals(Path.GetExtension(projectFilePath), StringComparison.OrdinalIgnoreCase)
+                    ? LanguageNames.VisualBasic
+                    : LanguageNames.CSharp;
+                var projectSourceFolder = Path.GetDirectoryName(projectFilePath);
+                var commandLineArguments = RemoveNonExistentReferencesFromCommandLine(invocation.CommandLineArguments, projectSourceFolder);
+
+                var projectInfo = CommandLineProject.CreateProjectInfo(
+                    projectName,
+                    language,
+                    commandLineArguments,
+                    projectSourceFolder,
+                    workspace);
+                solution = solution.AddProject(projectInfo);
+
+                projectIdByAssemblyName[invocation.AssemblyName] = projectInfo.Id;
+                outputPathByProjectId[projectInfo.Id] = invocation.OutputAssemblyPath;
+                languageByProjectId[projectInfo.Id] = language;
+
+                var referencedNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                foreach (var reference in invocation.Parsed.MetadataReferences)
+                {
+                    referencedNames.Add(Path.GetFileNameWithoutExtension(reference.Reference));
+                }
+                referencedAssemblyNamesByProjectId[projectInfo.Id] = referencedNames;
+            }
+
+            // Second pass: for every reference that targets another co-indexed assembly, add a
+            // project reference and drop the matching metadata reference so binding goes to source.
+            foreach (var projectId in solution.ProjectIds.ToArray())
+            {
+                foreach (var referencedName in referencedAssemblyNamesByProjectId[projectId])
+                {
+                    if (!projectIdByAssemblyName.TryGetValue(referencedName, out var targetProjectId) ||
+                        targetProjectId == projectId)
+                    {
+                        continue;
+                    }
+
+                    var project = solution.GetProject(projectId);
+                    var projectReference = new ProjectReference(targetProjectId);
+                    if (!project.AllProjectReferences.Contains(projectReference))
+                    {
+                        solution = solution.AddProjectReference(projectId, projectReference);
+                        Log.Message($"Wired project reference: {project.Name} -> {referencedName} (source, not metadata).");
+                    }
+
+                    project = solution.GetProject(projectId);
+                    foreach (var metadataReference in project.MetadataReferences.ToArray())
+                    {
+                        if (string.Equals(Path.GetFileNameWithoutExtension(metadataReference.Display), referencedName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            solution = solution.GetProject(projectId).RemoveMetadataReference(metadataReference).Solution;
+                        }
+                    }
+                }
+            }
+
+            // Post-process the combined solution exactly like the single-project CreateSolution does.
+            solution = RemoveNonExistingFiles(solution);
+            foreach (var projectId in solution.ProjectIds.ToArray())
+            {
+                solution = AddAssemblyAttributesFile(languageByProjectId[projectId], outputPathByProjectId[projectId], solution, projectId);
+            }
+            solution = DisambiguateSameNameLinkedFiles(solution);
+            solution = DeduplicateProjectReferences(solution);
+
+            solution.Workspace.RegisterWorkspaceFailedHandler(args => WorkspaceFailed(args, solution.Workspace));
+
+            return solution;
+        }
+
         public IEnumerable<string> GetAssemblyNames()
         {
             if (solution != null)
@@ -437,6 +574,11 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
         private static Solution AddAssemblyAttributesFile(string language, string outputAssemblyPath, Solution solution)
         {
+            return AddAssemblyAttributesFile(language, outputAssemblyPath, solution, solution.Projects.First().Id);
+        }
+
+        private static Solution AddAssemblyAttributesFile(string language, string outputAssemblyPath, Solution solution, ProjectId projectId)
+        {
             if (!File.Exists(outputAssemblyPath))
             {
                 // Builds that only collect the bin/ folder don't ship the obj/ copy the binlog
@@ -460,7 +602,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 var newAssemblyAttributesDocumentName = MetadataAsSource.GeneratedAssemblyAttributesFileName + extension;
                 var existingAssemblyAttributesFileName = "AssemblyAttributes" + extension;
 
-                var project = solution.Projects.First();
+                var project = solution.GetProject(projectId);
                 if (project.Documents.All(d => d.Name != existingAssemblyAttributesFileName || d.Folders.Count != 0))
                 {
                     var document = project.AddDocument(

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Host;
@@ -7,6 +8,14 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 {
     public static class WorkspaceHacks
     {
+        // Language services (ISemanticFactsService, ISyntaxFactsService, …) are
+        // process-wide singletons in Roslyn – all C# projects share one instance,
+        // all VB projects share another.  Cache per (language, serviceTypeName) so
+        // the expensive Assembly.Load / GetType / MakeGenericMethod / Invoke chain
+        // runs at most once per service type rather than once per document.
+        private static readonly ConcurrentDictionary<(string language, string serviceType), object>
+            s_serviceCache = new();
+
         public static dynamic GetSemanticFactsService(Document document)
         {
             return GetService(document, "Microsoft.CodeAnalysis.LanguageService.ISemanticFactsService", "Microsoft.CodeAnalysis.Workspaces");
@@ -44,12 +53,15 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
         private static object GetService(Document document, string serviceType, string assemblyName)
         {
-            var serviceAssembly = Assembly.Load(assemblyName);
-            var serviceInterfaceType = serviceAssembly.GetType(serviceType);
-            var genericMethod = typeof(LanguageServices).GetMethod(nameof(LanguageServices.GetService), BindingFlags.Public | BindingFlags.Instance);
-            var closedGenericMethod = genericMethod.MakeGenericMethod(serviceInterfaceType);
-            var service = closedGenericMethod.Invoke(document.Project.Services, Array.Empty<object>());
-            return service;
+            return s_serviceCache.GetOrAdd((document.Project.Language, serviceType), key =>
+            {
+                var (_, svcType) = key;
+                var serviceAssembly = Assembly.Load(assemblyName);
+                var serviceInterfaceType = serviceAssembly.GetType(svcType);
+                var genericMethod = typeof(LanguageServices).GetMethod(nameof(LanguageServices.GetService), BindingFlags.Public | BindingFlags.Instance);
+                var closedGenericMethod = genericMethod.MakeGenericMethod(serviceInterfaceType);
+                return closedGenericMethod.Invoke(document.Project.Services, Array.Empty<object>());
+            });
         }
     }
 }

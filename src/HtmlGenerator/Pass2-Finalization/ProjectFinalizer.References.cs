@@ -50,6 +50,13 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
             var referenceKindGroups = CreateReferences(referencesLines, out int totalReferenceCount, out string symbolName);
 
+            if (symbolName != null && Log.IsTracedSymbol(symbolName))
+            {
+                Log.Trace(symbolName, $"GenerateReferencesFile: assemblyId={this.AssemblyId} rawFile='{rawReferencesFile}' " +
+                    $"rawLineCount={referencesLines.Length} parsedReferenceCount={totalReferenceCount} " +
+                    $"kindGroupCount={referenceKindGroups.Count()} -> writing '{referencesFile}', then deleting raw file.");
+            }
+
             using (var writer = new StreamWriter(referencesFile, append: false, encoding: Encoding.UTF8))
             {
                 Markup.WriteReferencesFileHeader(writer, symbolName);
