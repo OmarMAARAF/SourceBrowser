@@ -39,26 +39,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             {
                 var symbolId = kvp.Key;
                 var referencesFileForSymbol = Path.Combine(referencesFolder, symbolId + ".txt");
-                bool hasReferencesFile = File.Exists(referencesFileForSymbol);
-
-                // This is the final gate: if no raw {symbolId}.txt ever landed in this project's
-                // _references folder (e.g. because AddReference in Pass1 computed a different
-                // symbolId for the caller than for the declaration - see SymbolIdService.GetId /
-                // DocumentationCommentId mismatch), the declaration's hyperlink gets zeroed out here
-                // and the declaration page will show "no usages" even if references were detected and
-                // written elsewhere under a different symbolId.
-                if (!hasReferencesFile)
+                if (!File.Exists(referencesFileForSymbol))
                 {
-                    var declaredId = Serialization.HexStringToULong(symbolId);
-                    string declaredName = DeclaredSymbols.TryGetValue(declaredId, out var info) ? info.Name : null;
-                    if (declaredName != null && Log.IsTracedSymbol(declaredName))
-                    {
-                        Log.Trace(declaredName, $"GetLocationsToPatch: assemblyId={this.AssemblyId} symbolId={symbolId} " +
-                            $"has NO raw references file at '{referencesFileForSymbol}' -> {kvp.Value.Count} declaration location(s) " +
-                            "will be BACKPATCHED to zero-id (link removed, 'no usages' will be shown), even if references " +
-                            "were recorded elsewhere under a mismatched symbolId.");
-                    }
-
                     foreach (var location in kvp.Value)
                     {
                         if (location.Item2 != 0)
@@ -66,15 +48,6 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                             var filePath = Path.Combine(ProjectDestinationFolder, location.Item1 + ".html");
                             AddLocationToPatch(locationsToPatch, filePath, location.Item2);
                         }
-                    }
-                }
-                else
-                {
-                    var declaredId = Serialization.HexStringToULong(symbolId);
-                    if (DeclaredSymbols.TryGetValue(declaredId, out var info) && Log.IsTracedSymbol(info.Name))
-                    {
-                        Log.Trace(info.Name, $"GetLocationsToPatch: assemblyId={this.AssemblyId} symbolId={symbolId} " +
-                            $"HAS a raw references file at '{referencesFileForSymbol}' -> link will be preserved.");
                     }
                 }
             }

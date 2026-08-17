@@ -348,13 +348,6 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 string symbolId = SymbolIdService.GetId(symbol);
                 var location = symbol.Locations[0];
                 string destinationAssemblyName = null;
-
-                Log.Trace(symbol.Name, $"ProcessReference: kind={kind} symbolId={symbolId} " +
-                    $"docCommentId={symbol.GetDocumentationCommentId() ?? "<null>"} " +
-                    $"location.IsInSource={location.IsInSource} location.IsInMetadata={location.IsInMetadata} " +
-                    $"containingAssembly={symbol.ContainingAssembly?.Name ?? "<none>"} " +
-                    $"currentDocument={this.documentDestinationFilePath}");
-
                 if (location.IsInSource)
                 {
                     result = GenerateHyperlink(symbol, symbolId, location.SourceTree, out destinationAssemblyName);
@@ -367,8 +360,6 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
                 if (result == null)
                 {
-                    Log.Trace(symbol.Name, "ProcessReference: DISCARDED - GenerateHyperlink returned null " +
-                        "(symbol location not resolvable to source or metadata module; reference will NOT be recorded).");
                     return result;
                 }
 
@@ -378,7 +369,6 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 {
                     // only register a reference to the symbol if it's not a symbol from an external assembly.
                     // if this links to a symbol in a different index, link target contain @.
-                    Log.Trace(symbol.Name, $"ProcessReference: ADDING reference -> destinationAssemblyName={destinationAssemblyName ?? "<null>"} symbolId={symbolId}");
                     projectGenerator.AddReference(
                         this.documentDestinationFilePath,
                         Text,
@@ -388,10 +378,6 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                         classifiedSpan.TextSpan.Start,
                         classifiedSpan.TextSpan.End,
                         kind);
-                }
-                else
-                {
-                    Log.Trace(symbol.Name, $"ProcessReference: DISCARDED - target href '{target}' points to a federated/external index (contains '@'); not recorded locally.");
                 }
             }
 

@@ -89,10 +89,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
         public static bool LoadPlugins { get; set; }
         public static bool ExcludeTests { get; set; }
 
-        /// <summary>
-        /// When multiple projects share the same assembly short name, index the duplicates under a
-        /// unique folder name (e.g. Foo_2) instead of dropping all but the first one.
-        /// </summary>
+        // When true, duplicate assembly names get indexed under a unique folder (e.g. Foo_2) instead of being dropped.
         public static bool AllowDuplicateAssemblies { get; set; }
 
         private void SetupPluginAggregator()
@@ -146,143 +143,6 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 outputAssemblyPath);
         }
 
-        // Constructs a generator around a pre-built, multi-project Roslyn solution (see
-        // CreateFromInvocations). Used for the binlog path so that several co-indexed assemblies
-        // live in ONE solution and can reference each other by source rather than metadata.
-        private SolutionGenerator(
-            Solution solution,
-            string solutionSourceFolder,
-            string solutionDestinationFolder,
-            bool includeSourceGeneratedDocuments)
-        {
-            this.solution = solution;
-            this.workspace = solution?.Workspace;
-            this.SolutionSourceFolder = solutionSourceFolder;
-            this.SolutionDestinationFolder = solutionDestinationFolder;
-            this.IncludeSourceGeneratedDocuments = includeSourceGeneratedDocuments;
-            SetupPluginAggregator();
-        }
-
-        /// <summary>
-        /// Builds a single Roslyn solution containing every supplied binlog invocation as its own
-        /// project, then rewrites the metadata references that point at co-indexed assemblies into
-        /// project (source) references. This makes callers bind to the SAME source symbols the
-        /// declaration is generated from, so their DocumentationCommentId (and therefore the
-        /// SourceBrowser symbol id) matches and cross-assembly "find all references" works in
-        /// binlog mode exactly like it does when indexing a .sln. Without this, each invocation is
-        /// compiled in isolation against sibling assemblies' metadata; when a referenced type can't
-        /// be resolved locally the signature falls back to an error type, the symbol id diverges,
-        /// and the declaration page shows no usages.
-        /// </summary>
-        public static SolutionGenerator CreateFromInvocations(
-            IReadOnlyList<GenerateFromBuildLog.CompilerInvocation> invocations,
-            string solutionSourceFolder,
-            string solutionDestinationFolder,
-            bool includeSourceGeneratedDocuments,
-            IReadOnlyDictionary<string, string> serverPathMappings = null)
-        {
-            var workspace = CreateWorkspace();
-            var solution = BuildCombinedSolution(workspace, invocations);
-
-            var generator = new SolutionGenerator(
-                solution,
-                solutionSourceFolder,
-                solutionDestinationFolder,
-                includeSourceGeneratedDocuments);
-            generator.ServerPathMappings = serverPathMappings;
-            return generator;
-        }
-
-        private static Solution BuildCombinedSolution(
-            Workspace workspace,
-            IReadOnlyList<GenerateFromBuildLog.CompilerInvocation> invocations)
-        {
-            var solution = workspace.CurrentSolution;
-
-            // First pass: add every invocation as a project and remember, per project, its assembly
-            // short name, output DLL path, language, and the set of assembly names it references
-            // (taken from the ORIGINAL parsed command line so refs that get dropped/redirected below
-            // can still be turned into project references).
-            var projectIdByAssemblyName = new Dictionary<string, ProjectId>(StringComparer.OrdinalIgnoreCase);
-            var outputPathByProjectId = new Dictionary<ProjectId, string>();
-            var languageByProjectId = new Dictionary<ProjectId, string>();
-            var referencedAssemblyNamesByProjectId = new Dictionary<ProjectId, HashSet<string>>();
-
-            foreach (var invocation in invocations)
-            {
-                var projectFilePath = invocation.ProjectFilePath;
-                var projectName = Path.GetFileNameWithoutExtension(projectFilePath);
-                var language = ".vbproj".Equals(Path.GetExtension(projectFilePath), StringComparison.OrdinalIgnoreCase)
-                    ? LanguageNames.VisualBasic
-                    : LanguageNames.CSharp;
-                var projectSourceFolder = Path.GetDirectoryName(projectFilePath);
-                var commandLineArguments = RemoveNonExistentReferencesFromCommandLine(invocation.CommandLineArguments, projectSourceFolder);
-
-                var projectInfo = CommandLineProject.CreateProjectInfo(
-                    projectName,
-                    language,
-                    commandLineArguments,
-                    projectSourceFolder,
-                    workspace);
-                solution = solution.AddProject(projectInfo);
-
-                projectIdByAssemblyName[invocation.AssemblyName] = projectInfo.Id;
-                outputPathByProjectId[projectInfo.Id] = invocation.OutputAssemblyPath;
-                languageByProjectId[projectInfo.Id] = language;
-
-                var referencedNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                foreach (var reference in invocation.Parsed.MetadataReferences)
-                {
-                    referencedNames.Add(Path.GetFileNameWithoutExtension(reference.Reference));
-                }
-                referencedAssemblyNamesByProjectId[projectInfo.Id] = referencedNames;
-            }
-
-            // Second pass: for every reference that targets another co-indexed assembly, add a
-            // project reference and drop the matching metadata reference so binding goes to source.
-            foreach (var projectId in solution.ProjectIds.ToArray())
-            {
-                foreach (var referencedName in referencedAssemblyNamesByProjectId[projectId])
-                {
-                    if (!projectIdByAssemblyName.TryGetValue(referencedName, out var targetProjectId) ||
-                        targetProjectId == projectId)
-                    {
-                        continue;
-                    }
-
-                    var project = solution.GetProject(projectId);
-                    var projectReference = new ProjectReference(targetProjectId);
-                    if (!project.AllProjectReferences.Contains(projectReference))
-                    {
-                        solution = solution.AddProjectReference(projectId, projectReference);
-                        Log.Message($"Wired project reference: {project.Name} -> {referencedName} (source, not metadata).");
-                    }
-
-                    project = solution.GetProject(projectId);
-                    foreach (var metadataReference in project.MetadataReferences.ToArray())
-                    {
-                        if (string.Equals(Path.GetFileNameWithoutExtension(metadataReference.Display), referencedName, StringComparison.OrdinalIgnoreCase))
-                        {
-                            solution = solution.GetProject(projectId).RemoveMetadataReference(metadataReference).Solution;
-                        }
-                    }
-                }
-            }
-
-            // Post-process the combined solution exactly like the single-project CreateSolution does.
-            solution = RemoveNonExistingFiles(solution);
-            foreach (var projectId in solution.ProjectIds.ToArray())
-            {
-                solution = AddAssemblyAttributesFile(languageByProjectId[projectId], outputPathByProjectId[projectId], solution, projectId);
-            }
-            solution = DisambiguateSameNameLinkedFiles(solution);
-            solution = DeduplicateProjectReferences(solution);
-
-            solution.Workspace.RegisterWorkspaceFailedHandler(args => WorkspaceFailed(args, solution.Workspace));
-
-            return solution;
-        }
-
         public IEnumerable<string> GetAssemblyNames()
         {
             if (solution != null)
@@ -315,12 +175,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
         {
             var workspace = CreateWorkspace();
 
-            // References/analyzers recorded in the binlog may point at files that don't exist on
-            // this machine (e.g. NuGet/SDK assemblies under a Linux build agent's
-            // '/opt/buildagent/system/dotnet/.nuget/...' path when indexing on Windows). Roslyn's
-            // CommandLineProject.CreateProjectInfo throws ArgumentException ("Can't resolve
-            // metadata reference") and aborts the whole project before SourceBrowser's later
-            // RemoveNonExistingReferences filter can run, so strip those switches up front.
+            // Strip references that don't resolve locally before Roslyn tries to load them (it throws otherwise).
             commandLineArguments = RemoveNonExistentReferencesFromCommandLine(commandLineArguments, projectSourceFolder);
 
             var projectInfo = CommandLineProject.CreateProjectInfo(
@@ -341,25 +196,15 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             return solution;
         }
 
-        // Matches the file-resolving compiler switches whose targets Roslyn insists on resolving
-        // eagerly (and throws on if missing): references, linked (embed-interop) references and
-        // analyzers, in both their long and short forms.
+        // Matches /reference, /link and /analyzer switches (long and short forms) whose paths Roslyn resolves eagerly.
         private static readonly Regex ReferenceSwitchRegex = new Regex(
             @"(?<switch>/(?:reference|r|link|l|analyzer|a):)(?:(?<alias>\w+)=)?(?:""(?<path>[^""]*)""|(?<path>[^""\s]+))",
             RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-        // Maps an assembly short name to an existing local output DLL, built from the binlog
-        // invocations' own outputs. Used to redirect a project's /reference: switch when the path
-        // the build recorded (typically a sibling project's obj/ output, or a foreign build-agent
-        // path) is absent locally but the same assembly's bin/ DLL was supplied. Without this,
-        // such references get dropped and Roslyn can't bind cross-project symbols, so cross-
-        // assembly "find all references" comes up empty. Deliberately separate from
-        // MetadataReading's AssemblyNameToFilePathMap so the metadata-as-source path is unaffected.
+        // Assembly short name -> local output DLL, used to redirect a missing /reference: path to a sibling project's own build output.
         public static readonly ConcurrentDictionary<string, string> LocalReferenceAssemblyMap =
             new ConcurrentDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-        // Records a binlog invocation's output assembly (resolving obj->bin when only the bin copy
-        // was supplied) so its DLL can later stand in for missing /reference: paths to it.
         public static void RegisterLocalOutputAssembly(string outputAssemblyPath)
         {
             if (string.IsNullOrEmpty(outputAssemblyPath))
@@ -374,18 +219,10 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             {
                 LocalReferenceAssemblyMap[Path.GetFileNameWithoutExtension(resolved)] = resolved;
             }
-            else
-            {
-                Log.Message("RegisterLocalOutputAssembly: could not locate DLL for " + outputAssemblyPath);
-            }
         }
 
-        /// <summary>
-        /// Removes reference/link/analyzer switches from a compiler command line when the file they
-        /// point at does not exist locally. This lets binlogs produced on another machine (where
-        /// NuGet/SDK assemblies live at foreign, non-rebasable paths) be indexed without Roslyn
-        /// aborting the project during <see cref="CommandLineProject.CreateProjectInfo"/>.
-        /// </summary>
+        // Drops /reference, /link and /analyzer switches that don't resolve locally, so Roslyn doesn't throw
+        // trying to load a binlog reference that only existed on the build machine.
         private static string RemoveNonExistentReferencesFromCommandLine(string commandLineArguments, string projectSourceFolder)
         {
             if (string.IsNullOrEmpty(commandLineArguments))
@@ -395,32 +232,14 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
             return ReferenceSwitchRegex.Replace(commandLineArguments, match =>
             {
-                // A single switch may list several comma-separated paths.
                 var paths = match.Groups["path"].Value.Split(',');
-
-                // Fast path: everything the build recorded is present locally, leave it untouched.
                 if (paths.All(p => ReferenceFileExists(p, projectSourceFolder)))
                 {
                     return match.Value;
                 }
 
-                // Otherwise keep paths that exist, redirect missing ones to the local bin/ DLL of
-                // the same assembly (sibling projects in a single binlog reference each other's
-                // unshipped obj/ outputs), and drop only those we genuinely can't locate.
                 var resolved = paths
-                    .Select(p =>
-                    {
-                        var r = ResolveReferencePath(p, projectSourceFolder);
-                        if (r == null)
-                        {
-                            Log.Message("DROPPED reference (not found locally, no substitute): " + p);
-                        }
-                        else if (!string.Equals(r, p, StringComparison.OrdinalIgnoreCase))
-                        {
-                            Log.Message("REDIRECTED reference: " + p + " -> " + r);
-                        }
-                        return r;
-                    })
+                    .Select(p => ResolveReferencePath(p, projectSourceFolder))
                     .Where(p => p != null)
                     .ToArray();
 
@@ -435,10 +254,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             });
         }
 
-        // Returns the local path Roslyn should use for a recorded reference path: the path itself
-        // if it exists, otherwise the same assembly's supplied bin/ DLL, otherwise the same NuGet
-        // package resolved from this machine's own package cache, or null if none of those are
-        // available (in which case the reference is dropped).
+        // Resolves a recorded reference path to: the path itself, the same assembly's local build output,
+        // or the same NuGet package from this machine's own package cache.
         private static string ResolveReferencePath(string path, string projectSourceFolder)
         {
             if (string.IsNullOrWhiteSpace(path))
@@ -458,7 +275,6 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             }
             catch
             {
-                // Malformed path (e.g. foreign-OS characters); fall through to the map lookup.
             }
 
             if (LocalReferenceAssemblyMap.TryGetValue(Path.GetFileNameWithoutExtension(path), out var localPath))
@@ -475,18 +291,9 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             return null;
         }
 
-        // A binlog records NuGet package references under the machine/user that actually ran the
-        // build (e.g. a CI service account's "C:\Users\<agent>\.nuget\packages\..."). NuGet's global
-        // packages folder is per-user, so on any other machine - including a developer's own laptop -
-        // that exact path never exists, and EVERY package reference (including framework reference
-        // packages like Microsoft.NETFramework.ReferenceAssemblies, which ships mscorlib.dll/System.dll)
-        // gets silently dropped by RemoveNonExistentReferencesFromCommandLine. Losing mscorlib alone is
-        // enough to make basic types resolve as error types throughout the whole compilation, which is
-        // why references can vanish for essentially any symbol, not just cross-assembly ones. This
-        // re-roots a dropped "<...>\.nuget\packages\<package>\<version>\...\<file>" path onto the
-        // *current* machine's own NuGet global packages folder (NUGET_PACKAGES env var, else the
-        // standard "<user profile>/.nuget/packages" default) and keeps everything from "packages"
-        // onward, so a locally-restored copy of the same package/version is used instead.
+        // A binlog records NuGet paths under the machine that ran the build; NuGet's global packages
+        // folder is per-user, so those paths rarely exist elsewhere. Re-root the "packages\..." suffix
+        // onto this machine's own NuGet cache (NUGET_PACKAGES env var, else "<user profile>/.nuget/packages").
         private static readonly Lazy<string> localNuGetPackagesRoot = new Lazy<string>(() =>
         {
             var fromEnv = Environment.GetEnvironmentVariable("NUGET_PACKAGES");
@@ -508,16 +315,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
             var segments = path.Split('\\', '/');
             var packagesIndex = Array.FindIndex(segments, s => string.Equals(s, "packages", StringComparison.OrdinalIgnoreCase));
-            if (packagesIndex < 0 || packagesIndex == segments.Length - 1)
-            {
-                // Not a ".../packages/..." style NuGet cache path (or nothing follows "packages"),
-                // e.g. an SDK-shipped analyzer or MSBuild-Extensions path: no local package to fall back to.
-                return null;
-            }
-
-            // Only treat this as a NuGet cache path if "packages" is itself under a ".nuget" folder,
-            // to avoid accidentally matching an unrelated directory that happens to be named "packages".
-            if (packagesIndex == 0 || !string.Equals(segments[packagesIndex - 1], ".nuget", StringComparison.OrdinalIgnoreCase))
+            if (packagesIndex < 0 || packagesIndex == segments.Length - 1 ||
+                packagesIndex == 0 || !string.Equals(segments[packagesIndex - 1], ".nuget", StringComparison.OrdinalIgnoreCase))
             {
                 return null;
             }
@@ -543,7 +342,6 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             }
             catch
             {
-                // Malformed path (e.g. foreign-OS characters). Treat as non-existent so it's dropped.
                 return false;
             }
         }
@@ -674,8 +472,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
             return solution;
         }
-        // Caches the discovered bin folder per obj tree so the path work runs once instead of for
-        // every assembly. Keyed by the path segment before "obj", value is the sibling "bin" folder.
+
+        // Caches obj-tree root -> sibling bin folder, keyed by the path segment before "obj".
         private static readonly ConcurrentDictionary<string, string> binFolderCache =
             new ConcurrentDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
@@ -757,22 +555,11 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 Log.Exception("Solution " + this.ProjectFilePath + " has 0 projects - this is suspicious");
             }
 
-            // Diagnostic: report every project name/assembly Roslyn actually loaded so a
-            // duplicate-assembly-name project can't disappear silently between binlog read and
-            // indexer.
-            Log.Message(string.Format(
-                "SolutionGenerator '{0}' loaded {1} project(s): {2}",
-                this.ProjectFilePath,
-                allProjects.Length,
-                string.Join(", ", allProjects.Select(p => (p.AssemblyName ?? "<none>") + " [" + (p.FilePath ?? "-") + "]"))));
-
             var projectsToProcess = allProjects
                 .Where(p => !ExcludeTests || !IsTestProject(p))
                 .ToArray();
 
-            // Maps a project to the folder/assembly name it should be indexed under. Only populated
-            // for duplicates when AllowDuplicateAssemblies is set; the default (non-duplicate) name
-            // is used otherwise.
+            // Populated only for duplicate assembly names, when AllowDuplicateAssemblies relocates them to a unique folder.
             var assemblyNameOverrides = new Dictionary<ProjectId, string>();
 
             var currentBatch = new List<Project>();
@@ -780,7 +567,6 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             {
                 if (processedAssemblyList == null)
                 {
-                    // No cross-invocation tracking (single project / metadata-as-source path): index as-is.
                     currentBatch.Add(project);
                     continue;
                 }
@@ -792,8 +578,6 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
                 if (resolvedName == null)
                 {
-                    // Duplicate assembly name and duplicates are not allowed: skip, but say why so the
-                    // dropped project isn't a silent mystery.
                     Log.Message(string.Format(
                         "Skipping project '{0}': assembly '{1}' was already indexed. Pass /allowduplicateassemblies to index it under a separate folder.",
                         project.FilePath,
@@ -803,7 +587,6 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
                 if (resolvedName != project.AssemblyName)
                 {
-                    // Duplicate that we're keeping: relocate it to a unique folder.
                     assemblyNameOverrides[project.Id] = resolvedName;
                     Log.Message(string.Format(
                         "Assembly '{0}' was already indexed; indexing duplicate project '{1}' as '{2}'.",

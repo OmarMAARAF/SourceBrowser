@@ -3,10 +3,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Logging.StructuredLogger;
 using Microsoft.CodeAnalysis;
-using Microsoft.SourceBrowser.Common;
 using CompilerInvocation = Microsoft.SourceBrowser.HtmlGenerator.GenerateFromBuildLog.CompilerInvocation;
 
 namespace Microsoft.SourceBrowser.HtmlGenerator
@@ -19,8 +17,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
     public class BinLogCompilerInvocationsReader
     {
-        /// Binlog reader does not handle concurrent accesses appropriately so handle it here.
-        /// The cached result stores both compiler invocations and metadata so the file is read once
+        // Caches the parsed result per file so a binlog is only read once, and so concurrent callers don't race the reader.
         private static readonly ConcurrentDictionary<string, Lazy<BinLogExtractionResult>> mBinlogDataMap = new ConcurrentDictionary<string, Lazy<BinLogExtractionResult>>(StringComparer.OrdinalIgnoreCase);
         private const string TeamcityBuildCheckoutDir = "teamcity_build_checkoutDir";
 
@@ -70,7 +67,6 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             var checkoutDir = build
                 .FindChildrenRecursive<Property>()
                 .FirstOrDefault(p => string.Equals(p.Name, TeamcityBuildCheckoutDir, StringComparison.OrdinalIgnoreCase))?.Value;
-            Log.Message($"Old checkout directory in binlog is : {checkoutDir}");
             return new BinLogExtractionResult(invocations, checkoutDir);
         }
 
@@ -94,7 +90,6 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 ProjectFilePath = task.GetNearestParent<Microsoft.Build.Logging.StructuredLogger.Project>()?.ProjectFile
             };
 
-            // Mirror the streaming reader so both paths resolve the output assembly path.
             var parsed = invocation.Parsed;
             if (invocation.Language == LanguageNames.CSharp && parsed != null)
             {
@@ -110,15 +105,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 return commandLine;
             }
 
-            // The compiler token appears in different forms depending on the OS/build host:
-            //   Windows:      C:\...\bin\Roslyn\csc.exe /noconfig ...
-            //   Windows (SDK): "C:\...\csc.dll" /noconfig ...
-            //   Linux/macOS:  /usr/.../dotnet exec "/usr/.../Roslyn/bincore/csc.dll" /noconfig ...
-            // In the .dll forms the path is usually wrapped in quotes, so the character right
-            // after "csc.dll"/"vbc.dll" is a double quote rather than a space. Searching for the
-            // token followed by a literal space (as was done previously) fails on these binlogs
-            // and leaves the "dotnet exec ...csc.dll" prefix in the command line, which then gets
-            // misinterpreted as extra source files by the command line parser.
+            // The compiler token can appear as "csc.exe " or as a quoted "csc.dll" (SDK/Linux builds
+            // invoke it via dotnet exec), so both extensions and an optional closing quote are handled.
             var compiler = language == CompilerKind.CSharp ? "csc" : "vbc";
 
             foreach (var extension in new[] { ".exe", ".dll" })
@@ -150,40 +138,5 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             return commandLine;
         }
 
-        public static string GetCommandLineFromEventArgs(BuildEventArgs args, out CompilerKind language)
-        {
-            var task = args as TaskCommandLineEventArgs;
-            language = default;
-            if (task == null)
-            {
-                return null;
-            }
-
-            var name = task.TaskName;
-            if (name != "Csc" && name != "Vbc")
-            {
-                return null;
-            }
-
-            language = name == "Csc" ? CompilerKind.CSharp : CompilerKind.VisualBasic;
-            var commandLine = task.CommandLine;
-            commandLine = TrimCompilerExeFromCommandLine(commandLine, language);
-            return commandLine;
-        }
-
-
-        /// Extracts the original checkout directory from binlog metadata.
-        public static string ExtractCheckoutDirectory(string binLogFilePath)
-        {
-            try
-            {
-                return ExtractBinLogData(binLogFilePath).CheckoutDirectory;
-            }
-            catch (Exception ex)
-            {
-                Log.Exception(ex, $"Failed to extract checkout directory from binlog: {binLogFilePath}", isSevere: false);
-                return null;
-            }
-        }
     }
 }

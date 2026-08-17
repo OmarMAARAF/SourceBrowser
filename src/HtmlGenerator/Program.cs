@@ -38,12 +38,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             AssertTraceListener.Register();
             AppDomain.CurrentDomain.FirstChanceException += FirstChanceExceptionHandler.HandleFirstChanceException;
 
-            // This loads the real MSBuild from the toolset so that all targets and SDKs can be found
-            // as if a real build is happening
-            
-            // This a hack to force MSBuild.Locator to resolve latest MSBuild version: on some machines the resolved version is 16 instead of 17. https://github.com/dotnet/roslyn/issues/58286
-            // The bug seems to be introduced in MSBuild.Locator 1.5.* versions https://github.com/microsoft/MSBuildLocator/issues/176. The issue is fixed, but somehow we are still facing the issue 
-
+            // Loads the real MSBuild toolset so all targets/SDKs resolve as if a real build were happening.
+            // Picking the highest version explicitly works around MSBuildLocator sometimes resolving v16 instead of v17.
             var msbuild = MSBuildLocator.QueryVisualStudioInstances().OrderByDescending(i => i.Version).First();
             MSBuildLocator.RegisterInstance(msbuild);
             Log.Message($"Registered MSBuild is: {msbuild.Version} from '{msbuild.MSBuildPath}'");
@@ -82,7 +78,6 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     {
                         Log.Exception($"Assembly file {entry.Value} was not found", false);
                         continue;
-                        ;
                     }
                     federation.AddFederation(entry.Key, entry.Value);
                 }
@@ -125,8 +120,9 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 + "Plugins are now off by default.");
         }
         
-        /// Rewrites paths in compiler invocations extracted from a .binlog that was produced on a different machine/agent so they point at where the sources actually live locally.
-        /// Uses teamcity_build_checkoutDir from binlog metadata as the original path, or infers the original root from the longest common directory prefix of all project file paths.
+        // Rewrites paths in compiler invocations extracted from a .binlog built on another machine so they
+        // point at where the sources actually live locally. Uses teamcity_build_checkoutDir from the binlog
+        // metadata as the original root, or infers it from the longest common prefix of the project paths.
         private static GenerateFromBuildLog.CompilerInvocation[] ReplaceRootInInvocations(
             IEnumerable<GenerateFromBuildLog.CompilerInvocation> invocations,
             string oldRoot,
@@ -135,34 +131,28 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             var list = invocations.ToArray();
             if (list.Length == 0) return list;
 
-            // No checkout directory found in metadata – compute from invocation project paths
             if (string.IsNullOrEmpty(oldRoot))
             {
                 oldRoot = ComputeCommonRootFromProjectPaths(list);
                 if (string.IsNullOrEmpty(oldRoot))
                 {
-                    Log.Message("No checkout directory found in binlog metadata and could not compute common root from invocations, skipping replacement root");
                     return list;
                 }
-                Log.Message($"Computed common root from project paths: '{oldRoot}'");
             }
-            // Resolve target: if oldRoot folder exists as subdirectory of replacementRoot, use that (when we use multiple project in the same folder e.g. RDWS)
+
+            // If oldRoot's folder exists as a subdirectory of newRoot, target that instead (multiple projects checked out under one shared folder).
             var resolvedRoot = ResolveReplacementRootTarget(newRoot, oldRoot);
-            // Paths are already correct - return original invocations
             if (string.Equals(oldRoot, resolvedRoot, StringComparison.OrdinalIgnoreCase))
             {
                 return list;
             }
-            Log.Message($"Replacing root paths from '{oldRoot}' to '{resolvedRoot}'");
-            // Cache the compiled regex and escaped replacement string (created once, used for all invocations)
+
             var oldRootRegex = new Regex(Regex.Escape(oldRoot), RegexOptions.IgnoreCase | RegexOptions.Compiled);
-            var escapedNewRoot = resolvedRoot.Replace("$", "$$"); // '$' is special in Regex replacements
+            var escapedNewRoot = resolvedRoot.Replace("$", "$$");
             var result = new GenerateFromBuildLog.CompilerInvocation[list.Length];
             Parallel.For(0, list.Length, i =>
             {
                 var inv = list[i];
-
-                //check if command line contains oldRoot before expensive regex replacement to improve perf
                 var cmdLine = inv.CommandLineArguments ?? string.Empty;
                 var replacedCmdLine = cmdLine.IndexOf(oldRoot, StringComparison.OrdinalIgnoreCase) >= 0
                     ? oldRootRegex.Replace(cmdLine, escapedNewRoot)
@@ -177,10 +167,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     Language             = inv.Language,
                 };
 
-                // Re-derive the output assembly path from the replaced project directory and command
-                // line. The value coming from the binlog reader may point at a foreign filesystem
-                // (and won't share oldRoot's separator/root style, so a plain prefix replacement can't
-                // fix it). Fall back to a prefix replacement of the original value if we can't recompute.
+                // The binlog-recorded output path may point at a foreign filesystem, so re-derive it
+                // from the replaced command line rather than just prefix-replacing.
                 replaced.OutputAssemblyPath =
                     RecomputeOutputAssemblyPath(replaced)
                     ?? ReplaceRootInPath(inv.OutputAssemblyPath, oldRoot, resolvedRoot);
@@ -190,6 +178,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
             return result;
         }
+
         private static string ResolveReplacementRootTarget(string newRoot, string oldRoot)
         {
             var oldFolder = Path.GetFileName(oldRoot.TrimEnd('\\', '/'));
@@ -199,34 +188,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             var candidate = Path.Combine(newRoot, oldFolder);
             return Directory.Exists(candidate) ? candidate : newRoot;
         }
-        
-        /// using the replacement root path when the original reference path does not exist
-        /// Without this check, some assemblies cannot be resolved, which can lead to missing references and broken navigation
-        private static string TryResolveAssemblyPathFromStandardStructure(string originalPath, string assemblyName, string replacementRoot)
-        {
-            if (string.IsNullOrEmpty(replacementRoot) || string.IsNullOrEmpty(originalPath))
-            {
-                return null;
-            }
-            try
-            {
-                // Extract framework from original path (e.g., "net471" from ...net471\Ard.Marvel.Minds.Core.dll)
-                var originalDir = Path.GetDirectoryName(originalPath);
-                var frameworkName = Path.GetFileName(originalDir);
-                if (string.IsNullOrEmpty(frameworkName)) return null;
-                // Resolve target 
-                var resolvedRoot = ResolveReplacementRootTarget(replacementRoot, replacementRoot);
-                // Build standard path: {resolvedRoot}\.ard\bin\{framework}\{assemblyName}.dll
-                var alternativePath = Path.Combine(resolvedRoot, ".ard", "bin", frameworkName, $"{assemblyName}.dll");
-                if (File.Exists(alternativePath)) return alternativePath;
-            }
-            catch (Exception ex)
-            {
-                Log.Exception(ex, $"Error trying to resolve '{assemblyName}' from standard structure", isSevere: false);
-            }
-            return null;
-        }
-        /// Computes the original root directory by finding the longest common directory prefix of all values.
+
+        // Longest common directory prefix of all project paths, used when the binlog has no recorded checkout directory.
         private static string ComputeCommonRootFromProjectPaths(GenerateFromBuildLog.CompilerInvocation[] invocations)
         {
             string commonPrefix = null;
@@ -304,10 +267,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             return Path.GetFullPath(Path.Combine(newRoot, relativePath));
         }
 
-        // Re-parses the (already replaced) command line to determine where the output assembly would
-        // live on the local machine. Returns null when it can't be determined (e.g. TypeScript
-        // invocations, response files that only exist on the build agent, or parse failures), in
-        // which case the caller falls back to a best-effort prefix replacement of the recorded value.
+        // Re-parses the replaced command line to find where the output assembly lives locally.
+        // Returns null if it can't be determined, in which case the caller falls back to a prefix replacement.
         private static string RecomputeOutputAssemblyPath(GenerateFromBuildLog.CompilerInvocation invocation)
         {
             if (string.IsNullOrEmpty(invocation.ProjectFilePath) || invocation.ProjectFilePath == "-")
@@ -371,8 +332,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             }
 
             // Temporary: only index Highway assemblies to speed up test runs.
-            assemblyNames.RemoveWhere(n => ! assymbliesToRead.Contains(n));
-            Log.Message($"Assembly filter active (hardcoded: Highway): {assemblyNames.Count} assemblies kept.");
+            assemblyNames.RemoveWhere(n => !assymbliesToRead.Contains(n));
 
             var processedAssemblyList = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
@@ -407,30 +367,14 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                         invocations = invocations
                             .Where(inv => assymbliesToRead.Contains(inv.AssemblyName))
                             .ToArray();
-                        Log.Message($"Assembly filter: kept {invocations.Length} invocation(s) matching 'Highway'.");
-                        // Build a map of assembly names to their physical DLL paths from all references found in the binlog.
-                        // this helps 
-                        int assemblyMapEntriesBefore = GenerateFromBuildLog.AssemblyNameToFilePathMap.Count;
+
                         foreach (var invocation in invocations)
                         {
                             SolutionGenerator.RegisterLocalOutputAssembly(invocation.OutputAssemblyPath);
                         }
 
-                        Log.Message($"LocalReferenceAssemblyMap has {SolutionGenerator.LocalReferenceAssemblyMap.Count} entr(ies) after registering outputs for '{path}'.");
-
-                        // Each invocation is compiled in its own isolated Roslyn project/solution, exactly
-                        // as MSBuild originally compiled it: sibling assemblies are seen only as metadata
-                        // (their .dll), never as source. Log what each invocation actually references so
-                        // we can see, per assembly, whether the declaring assembly's DLL was resolved at
-                        // all before the reference gets a chance to be recorded.
                         foreach (var invocation in invocations)
                         {
-                            var referencedAssemblyNames = invocation.Parsed.MetadataReferences
-                                .Select(r => Path.GetFileNameWithoutExtension(r.Reference))
-                                .Where(n => assymbliesToRead.Contains(n))
-                                .ToArray();
-                            Log.Message($"Invocation '{invocation.AssemblyName}' ({invocation.ProjectFilePath}) references these co-indexed assemblies as METADATA: {(referencedAssemblyNames.Length == 0 ? "<none>" : string.Join(", ", referencedAssemblyNames))}");
-
                             await GenerateFromBuildLog.GenerateInvocationAsync(
                                 invocation,
                                 cancellationToken,

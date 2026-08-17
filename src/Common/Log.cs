@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -66,44 +65,6 @@ namespace Microsoft.SourceBrowser.Common
         {
             Write(message, ConsoleColor.Blue);
             WriteToFile(message, MessageLogFilePath);
-        }
-
-        // Comma-separated symbol names to trace end-to-end through reference indexing (see
-        // DocumentGenerator.ProcessReference, ProjectGenerator.AddReference/GenerateReferencesDataFilesToAssembly,
-        // and ProjectFinalizer.GenerateReferencesFile). Set SOURCEBROWSER_TRACE_SYMBOLS=GetJobErrorAsync
-        // to follow a specific symbol's usages from detection through to the final written file without
-        // flooding the log with every symbol in the index.
-        private static readonly Lazy<string[]> traceSymbolNames = new Lazy<string[]>(() =>
-            (Environment.GetEnvironmentVariable("SOURCEBROWSER_TRACE_SYMBOLS") ?? string.Empty)
-                .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-                .Select(s => s.Trim())
-                .Where(s => s.Length > 0)
-                .ToArray());
-
-        public static bool IsTracedSymbol(string symbolName)
-        {
-            if (string.IsNullOrEmpty(symbolName) || traceSymbolNames.Value.Length == 0)
-            {
-                return false;
-            }
-
-            foreach (var traced in traceSymbolNames.Value)
-            {
-                if (string.Equals(traced, symbolName, StringComparison.Ordinal))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        public static void Trace(string symbolName, string message)
-        {
-            if (IsTracedSymbol(symbolName))
-            {
-                Message("[TRACE:" + symbolName + "] " + message);
-            }
         }
 
         private static void WriteToFile(string message, string filePath)

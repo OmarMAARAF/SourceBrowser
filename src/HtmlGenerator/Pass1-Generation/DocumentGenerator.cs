@@ -15,8 +15,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 {
     public partial class DocumentGenerator
     {
-        // Cache MethodInfo by concrete service type so GetMethod() runs at most once per type
-        // rather than once per document.  Delegate.CreateDelegate from a cached MethodInfo is fast.
+        // Cache MethodInfo by service type so GetMethod() runs once per type instead of once per document.
         private static readonly ConcurrentDictionary<Type, MethodInfo> s_isWrittenToMethodCache = new();
         private static readonly ConcurrentDictionary<Type, MethodInfo> s_getBindableParentMethodCache = new();
 
@@ -308,9 +307,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 return;
             }
 
-            // Flush once to drain the StreamWriter's internal buffer into the
-            // underlying stream, then track bytes written in-process from here on.
-            // This eliminates one OS flush syscall per declared symbol.
+            // Flush once, then track bytes written ourselves instead of flushing per declared symbol.
             writer.Flush();
             long streamPosition = writer.BaseStream.Position;
 
@@ -386,8 +383,6 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
             if (hyperlinkInfo?.DeclaredSymbol != null)
             {
-                // streamPosition already tracks bytes written before this call (maintained by
-                // GeneratePre via Encoding.UTF8.GetByteCount), so no flush is needed here.
                 long symbolPosition = streamPosition + html.IndexOf(hyperlinkInfo.Attributes["id"] + ".html", StringComparison.Ordinal);
                 projectGenerator.AddDeclaredSymbol(
                     hyperlinkInfo.DeclaredSymbol,
