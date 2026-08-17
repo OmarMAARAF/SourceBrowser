@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Classification;
@@ -477,6 +478,17 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             return symbol?.Kind == SymbolKind.Parameter && ((IParameterSymbol)symbol).IsThis;
         }
 
+        private static IMethodSymbol GetAssociatedExtensionImplementation(IMethodSymbol methodSymbol)
+        {
+            if (methodSymbol == null)
+            {
+                return null;
+            }
+
+            var property = methodSymbol.GetType().GetProperty("AssociatedExtensionImplementation", BindingFlags.Instance | BindingFlags.Public);
+            return property?.GetValue(methodSymbol) as IMethodSymbol;
+        }
+
         private static ISymbol MapExtensionImplementationToDefinition(IMethodSymbol methodSymbol)
         {
             // https://github.com/dotnet/csharplang/blob/main/proposals/csharp-14.0/extensions.md#lowering
@@ -495,25 +507,32 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
                 foreach (var extensionMember in nestedType.GetMembers())
                 {
-                    if (extensionMember.Kind == SymbolKind.Method && extensionMember is IMethodSymbol { AssociatedExtensionImplementation: { } methodImplementationSymbol })
+                    if (extensionMember.Kind == SymbolKind.Method && extensionMember is IMethodSymbol methodDeclaration)
                     {
-                        if (SymbolEqualityComparer.Default.Equals(methodSymbol, methodImplementationSymbol))
+                        var methodImplementationSymbol = GetAssociatedExtensionImplementation(methodDeclaration);
+                        if (methodImplementationSymbol != null && SymbolEqualityComparer.Default.Equals(methodSymbol, methodImplementationSymbol))
                         {
                             return extensionMember;
                         }
                     }
                     else if (extensionMember.Kind == SymbolKind.Property && extensionMember is IPropertySymbol propertySymbol)
                     {
-                        if (propertySymbol.GetMethod?.AssociatedExtensionImplementation is { } getMethodImplementationSymbol &&
-                            SymbolEqualityComparer.Default.Equals(methodSymbol, getMethodImplementationSymbol))
+                        if (propertySymbol.GetMethod != null)
                         {
-                            return extensionMember;
+                            var getMethodImplementationSymbol = GetAssociatedExtensionImplementation(propertySymbol.GetMethod);
+                            if (getMethodImplementationSymbol != null && SymbolEqualityComparer.Default.Equals(methodSymbol, getMethodImplementationSymbol))
+                            {
+                                return extensionMember;
+                            }
                         }
 
-                        if (propertySymbol.SetMethod?.AssociatedExtensionImplementation is { } setMethodImplementationSymbol &&
-                            SymbolEqualityComparer.Default.Equals(methodSymbol, setMethodImplementationSymbol))
+                        if (propertySymbol.SetMethod != null)
                         {
-                            return extensionMember;
+                            var setMethodImplementationSymbol = GetAssociatedExtensionImplementation(propertySymbol.SetMethod);
+                            if (setMethodImplementationSymbol != null && SymbolEqualityComparer.Default.Equals(methodSymbol, setMethodImplementationSymbol))
+                            {
+                                return extensionMember;
+                            }
                         }
                     }
                 }

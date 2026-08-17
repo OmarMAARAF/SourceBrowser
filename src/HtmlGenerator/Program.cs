@@ -418,40 +418,19 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
                         Log.Message($"LocalReferenceAssemblyMap has {SolutionGenerator.LocalReferenceAssemblyMap.Count} entr(ies) after registering outputs for '{path}'.");
 
-                        // TypeScript invocations and metadata-as-source invocations (no source project,
-                        // ProjectFilePath == "-") can't participate in a combined Roslyn solution; keep
-                        // processing those one at a time as before. Everything else is combined into a
-                        // single solution so cross-assembly references bind to source symbols instead of
-                        // metadata (see SolutionGenerator.CreateFromInvocations for why that matters:
-                        // metadata-bound symbols can get a different DocumentationCommentId, so their
-                        // "usages" never join the declaration's reference file).
-                        var standaloneInvocations = invocations
-                            .Where(inv => inv.Language == "TypeScript" || inv.ProjectFilePath == "-")
-                            .ToArray();
-                        var combinedInvocations = invocations
-                            .Except(standaloneInvocations)
-                            .ToArray();
-
-                        Log.Message($"Reference-resolution mode: {combinedInvocations.Length} invocation(s) will be combined into one solution (source-to-source references); {standaloneInvocations.Length} invocation(s) processed standalone (TypeScript or metadata-as-source).");
-
-                        if (combinedInvocations.Length > 0)
+                        // Each invocation is compiled in its own isolated Roslyn project/solution, exactly
+                        // as MSBuild originally compiled it: sibling assemblies are seen only as metadata
+                        // (their .dll), never as source. Log what each invocation actually references so
+                        // we can see, per assembly, whether the declaring assembly's DLL was resolved at
+                        // all before the reference gets a chance to be recorded.
+                        foreach (var invocation in invocations)
                         {
-                            Log.Message($"Building combined solution for: {string.Join(", ", combinedInvocations.Select(i => i.AssemblyName))}");
+                            var referencedAssemblyNames = invocation.Parsed.MetadataReferences
+                                .Select(r => Path.GetFileNameWithoutExtension(r.Reference))
+                                .Where(n => assymbliesToRead.Contains(n))
+                                .ToArray();
+                            Log.Message($"Invocation '{invocation.AssemblyName}' ({invocation.ProjectFilePath}) references these co-indexed assemblies as METADATA: {(referencedAssemblyNames.Length == 0 ? "<none>" : string.Join(", ", referencedAssemblyNames))}");
 
-                            using (var solutionGenerator = SolutionGenerator.CreateFromInvocations(
-                                combinedInvocations,
-                                binlogData.CheckoutDirectory,
-                                Paths.SolutionDestinationFolder,
-                                includeSourceGeneratedDocuments,
-                                serverPathMappings))
-                            {
-                                solutionGenerator.GlobalAssemblyList = assemblyNames;
-                                await solutionGenerator.GenerateAsync(cancellationToken, processedAssemblyList, solutionFolder);
-                            }
-                        }
-
-                        foreach (var invocation in standaloneInvocations)
-                        {
                             await GenerateFromBuildLog.GenerateInvocationAsync(
                                 invocation,
                                 cancellationToken,
